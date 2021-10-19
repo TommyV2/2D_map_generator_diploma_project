@@ -1,0 +1,54 @@
+from world_map import WorldMap
+from start_data_object import StartDataObject
+from helper import *
+from random import randrange, uniform
+import numpy as np
+import time
+
+
+    
+
+def main():
+    # for i in range(0,50):
+    #     try:
+    print("###########################################")
+    size = (800, 800)
+    elevation_seed_index = randrange(0,2)
+    temperature_seed_index = randrange(0,11)
+    elevation_seed = np.loadtxt("elevation_seeds/seed"+str(elevation_seed_index)+".txt")
+    temperature_seed = np.loadtxt("temperature_seeds/seed"+str(temperature_seed_index)+".txt")
+    scale = get_random_scale()           
+    is_rivers = True
+    civilisations = False
+    water_level = 0.3
+    temperature_factor = uniform(-0.6,0.8) #-0.6 |snieg| -0.1 |trawa| 0.7 piach
+    islands_number = randrange(1,10)
+    heights = None
+    #custom config
+    #fixed = (1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
+    #light_fixed = (1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2)
+    # scale = (1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
+    # temperature_factor = 0.06609419514938386
+    # islands_number = 9
+    # heights = [(551, 810), (592, 785), (704, 796), (437, 704), (645, 236), (592, 589), (436, 749), (310, 769), (771, 629)]
+    # is_rivers = True
+    #scale = (1, 1.3, 1.5, 1.7, 1.9, 2.1, 2.3, 2.5, 2.7, 3)
+    ##############
+
+    print("Temperature: "+str(temperature_factor))
+            
+    start_data_object = StartDataObject(size, elevation_seed, temperature_seed, scale, is_rivers, 
+        civilisations, water_level, temperature_factor, islands_number, heights)
+    start = time.time()
+    world_map = WorldMap(start_data_object)
+    world_map.generate()
+    end = time.time()
+    print("Total generating time: "+ str(end-start) + "s")
+    print("###########################################")
+    # except:
+    #     print("ERROR
+
+if __name__ == '__main__':
+    main()
+
+
