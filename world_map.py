@@ -1,6 +1,7 @@
 from random import randrange, uniform, sample
-from colors import *
-from helper import *
+
+from numpy.core.fromnumeric import size
+import helper as hlp
 from PIL import Image, ImageDraw
 import math
 import numpy as np
@@ -19,16 +20,19 @@ class WorldMap:
         self.heights = data.heights
         self.rivers = None
         self.extra_rivers = None
+        self.red_rivers = []
 
 
     def generate(self):
         if self.heights == None:
-            self.heights = self.generate_islands(self.size[0], self.size[1], self.islands_number) 
+            self.heights = self.generate_islands(self.size[0], self.size[1], self.islands_number)        
         print("Heights:")
         print(self.heights)      
-        self.modify_elevation_map_with_islands()
+        self.modify_elevation_map_with_islands()          
+
         if self.is_rivers == True:
-            self.generate_rivers(self.size, self.elevation_map, self.water_level)       
+            #self.generate_rivers(self.size, self.elevation_map, self.water_level)
+            self.generate_rivers(self.size, self.water_level)       
             self.make_rivers_deep(self.rivers, self.elevation_map, 3)
             self.thermal_erosion(self.size, self.elevation_map)
         #self.make_rivers_deep(self.extra_rivers, self.elevation_map, 1)
@@ -45,204 +49,27 @@ class WorldMap:
             for x in range(self.size[0]):
                 e = self.elevation_map[y][x]
                 m = self.temperature_map[y][x]
-                biome= self.get_biome(e, m, self.water_level, self.temperature_factor)
+                biome= hlp.get_biome(e, m, self.water_level, self.temperature_factor)
                 pixels[x,y] = biome
-        # for river in self.rivers:
-        #     draw.line(river, fill=WATER, width=5)
+            if self.red_rivers != []:
+                for red_river in self.red_rivers:
+                    draw.line(red_river, fill=(237,28,36), width=2)
         # for extra_river in self.extra_rivers:
         #     draw.line(extra_river, fill=WATER, width=3)
         img.show()
-        img = img.save("new_biomes_generated_maps/"+str(self.elevation_map[0][0])+".jpg", format='JPEG', subsampling=0, quality=100 )        
+        img = img.save("generated_maps_22_10/"+str(self.elevation_map[0][0])+".jpg", format='JPEG', subsampling=0, quality=100 )        
         print("Finished drawing map")
         
-    def get_biome(self, e, m, water_level, temperature_factor):           
-        if e<water_level:
-            if m > temperature_factor+0.88:
-                return ICE
-            return WATER
-
-        if e<water_level+0.1:
-            if m<temperature_factor+0.8:
-                return BEACH
-            if m<temperature_factor+0.85:
-                return BEACH_COLD
-            return SNOW
-        
-        # if e>water_level+4.9:
-        #     if m < temperature_factor:
-        #         return DESERT_MOUNTAINS_6
-        #     if m < temperature_factor+ 0.8:
-        #         return MOUNTAINS_12
-        #     #if m < temperature_factor+0.4 or temperature_factor>0.1:
-        #     else:
-        #         return COLD_MOUNTAINS_6
-
-        # if e>water_level+4.8:
-        #     if m < temperature_factor:
-        #         return DESERT_MOUNTAINS_6
-        #     if m < temperature_factor+ 0.8:
-        #         return MOUNTAINS_11
-        #     #if m < temperature_factor+0.4 or temperature_factor>0.1:
-        #     else:
-        #         return COLD_MOUNTAINS_6
-        
-        # if e>water_level+4.6:
-        #     if m < temperature_factor:
-        #         return DESERT_MOUNTAINS_6
-        #     if m < temperature_factor+ 0.8:
-        #         return MOUNTAINS_10
-        #     #if m < temperature_factor+0.4 or temperature_factor>0.1:
-        #     else:
-        #         return COLD_MOUNTAINS_6
-
-        # if e>water_level+4.4:
-        #     if m < temperature_factor:
-        #         return DESERT_MOUNTAINS_6
-        #     if m < temperature_factor+ 0.8:
-        #         return MOUNTAINS_9
-        #     #if m < temperature_factor+0.4 or temperature_factor>0.1:
-        #     else:
-        #         return COLD_MOUNTAINS_6
-        
-        # if e>water_level+4.2:
-        #     if m < temperature_factor:
-        #         return DESERT_MOUNTAINS_6
-        #     if m < temperature_factor+ 0.8:
-        #         return MOUNTAINS_8
-        #     #if m < temperature_factor+0.4 or temperature_factor>0.1:
-        #     else:
-        #         return COLD_MOUNTAINS_6
-
-        # if e>water_level+4:
-        #     if m < temperature_factor:
-        #         return DESERT_MOUNTAINS_6
-        #     if m < temperature_factor+ 0.8:
-        #         return MOUNTAINS_7
-        #     #if m < temperature_factor+0.4 or temperature_factor>0.1:
-        #     else:
-        #         return COLD_MOUNTAINS_6
-
-        # if e>water_level+3.8:
-        #     if m < temperature_factor:
-        #         return DESERT_MOUNTAINS_6
-        #     if m < temperature_factor+ 0.8:
-        #         return MOUNTAINS_6
-        #     #if m < temperature_factor+0.4 or temperature_factor>0.1:
-        #     else:
-        #         return COLD_MOUNTAINS_6
-
-        # if e>water_level+3.65:
-        #     if m < temperature_factor:
-        #         return DESERT_MOUNTAINS_5
-        #     if m < temperature_factor+ 0.8:
-        #         return MOUNTAINS_5_6
-        #     #if m < temperature_factor+0.4 or temperature_factor>0.1:
-        #     else:
-        #         return COLD_MOUNTAINS_5
-
-        if e>water_level+3.2:
-            if m < temperature_factor:
-                return DESERT_MOUNTAINS_8
-            if m < temperature_factor+ 0.8:
-                return MOUNTAINS_8
-            #if m < temperature_factor+0.4 or temperature_factor>0.1:
-            else:
-                return COLD_MOUNTAINS_8
-
-        if e>water_level+2.8:
-            if m < temperature_factor:
-                return DESERT_MOUNTAINS_7
-            if m < temperature_factor+ 0.8:
-                return MOUNTAINS_7
-            #if m < temperature_factor+0.4 or temperature_factor>0.1:
-            else:
-                return COLD_MOUNTAINS_7
-            #return SNOW
-
-        if e>water_level+2.5:
-            if m < temperature_factor:
-                return DESERT_MOUNTAINS_6
-            if m < temperature_factor+ 0.8:
-                return MOUNTAINS_6
-            #if m < temperature_factor+0.4 or temperature_factor>0.1:
-            else:
-                return COLD_MOUNTAINS_6
-            #return SNOW
-
-        if e>water_level+2:
-            if m < temperature_factor:
-                return DESERT_MOUNTAINS_5
-            if m < temperature_factor+ 0.8:
-                return MOUNTAINS_5
-            #if m < temperature_factor+0.4 or temperature_factor>0.1:
-            else:
-                return COLD_MOUNTAINS_5
-
-        if e>water_level+1.6:
-            if m < temperature_factor:
-                return DESERT_MOUNTAINS_4
-            if m < temperature_factor+ 0.8:
-                return MOUNTAINS_4
-            #if m < temperature_factor+0.4 or temperature_factor>0.1:
-            else:
-                return COLD_MOUNTAINS_4
-
-        if e>water_level+1.4:
-            if m < temperature_factor:
-                return DESERT_MOUNTAINS_3
-            if m < temperature_factor+ 0.8:
-                return MOUNTAINS_3
-            #if m < temperature_factor+0.4 or temperature_factor>0.1:
-            else:
-                return COLD_MOUNTAINS_3
-
-        if e>water_level+1:
-            if m < temperature_factor:
-                return DESERT_MOUNTAINS_2
-            if m < temperature_factor+ 0.8:
-                return MOUNTAINS_2
-            #if m < temperature_factor+0.4 or temperature_factor>0.1:
-            else:
-                return COLD_MOUNTAINS_2
-            #return SNOW
-        if e>water_level+0.9:
-            if m < temperature_factor:
-                return DESERT_MOUNTAINS_1
-            if m < temperature_factor+ 0.8:
-                return MOUNTAINS_1
-            #if m < temperature_factor+0.4 or temperature_factor>0.1:
-            else:
-                return COLD_MOUNTAINS_1
-
-        if e>water_level+0.5:
-            if m < temperature_factor:
-                return DESERT
-            if m < temperature_factor +0.85:
-                return FOREST
-            return SNOW
-
-        if e>water_level+0.2:
-            if m < temperature_factor:
-                return DESERT            
-            if m < temperature_factor+0.8:
-                return GRASS
-            return SNOW
-
-        if m < temperature_factor:
-            return DESERT
-        if m < temperature_factor+0.8:
-            return GRASS        
-        return SNOW
-
     def modify_elevation_map_with_islands(self):
         for y in range(self.size[1]):   
             for x in range(self.size[0]):
                 temp = self.elevation_map[y][x]
                 custom = self.islands_function(y, x, self.heights, self.size[0], self.scale)
                 temp -= custom 
-                temp = temp / (0.54 + 0.50 + 0.25+ 0.13)
+                temp = temp / (0.54 + 0.50 + 0.25+  0.13)
                 temp = temp**(5) 
-                self.elevation_map[y][x] = temp
+
+                self.elevation_map[y][x] = temp               
         print("Finished modifying elevation")
 
     def modify_temperature_map_with_cold_spots(self):
@@ -290,8 +117,8 @@ class WorldMap:
             # *3 for 1000x1000 maps       
             x = randrange(0+width/10,width-width/10) 
             y = randrange(0+height/10,height-height/10)
-            # x = randrange(0+280,width-280) 
-            # y = randrange(0+280,height-280)
+            # x = randrange(0+180,width-180) 
+            # y = randrange(0+180,height-180)
             h = (x,y)
             heights.append(h)
             n-=1
@@ -307,7 +134,8 @@ class WorldMap:
             dist = tmp_dist           
         return dist
 
-    def generate_rivers(self, size, elevation_map, water_level):
+    def generate_rivers(self, size, water_level):
+        elevation_map = self.elevation_map
         rivers_number = randrange(5,15)
         i=0 
         starting_points = []
@@ -316,19 +144,20 @@ class WorldMap:
         while i < rivers_number:
             x = randrange(10,size[0]-10)
             y = randrange(10,size[1]-10)
-            if elevation_map[y][x] > water_level+1.5: #water_level+0.7
+            if elevation_map[y][x] > water_level+1.5: #water_level+0.7               
                 point= (y,x)
                 starting_points.append(point)
                 i+=1
         print("Rivers:")   
         print(starting_points)
+        #starting_points = [(500, 327), (627, 592), (681, 567), (522, 263), (710, 226), (610, 372), (637, 579), (392, 251), (612, 401)]
         rivers = []
         extra_rivers = []
         for point in starting_points:                
             extra = randrange(5, 20) # 8 15
             river = self.generate_river(size, rivers, point, elevation_map, False, water_level)
-            # if river == None:
-            #     continue
+            if river == None:
+                continue
             # connection_points = [i for i in river if elevation_map[int(i[1])][int(i[0])] > water_level]           
             # if extra > len(connection_points):
             #      extra = len(connection_points)
@@ -373,6 +202,7 @@ class WorldMap:
                     x = current_x + math.cos(angle)*(line_len+i*2)
                     y = current_y + math.sin(angle)*(line_len+i*2)
                     if x >= size[0] or y >= size[1] or x <= 0 or y <= 0:
+                        return None                        
                         tmp_x = current_x       
                         loop = False                        
                         end = True
@@ -415,9 +245,21 @@ class WorldMap:
             if end == True:
                 break
             if current_height < water_level:
-                if self.is_big_enought(size, elevation_map, angles2, p, water_level) == True:
-                    #self.modify_elevation_map_with_lake(p)
+                # hlp.count_water_pixels(p, elevation_map)
+                # if hlp.cnt >= 400:
+                #     hlp.set_cnt()
+                #     break
+                # else:
+                #     hlp.set_cnt()
+                #     return None
+                if self.is_big_enought(size, elevation_map, angles, p, water_level) == True:
                     break
+                # else:
+                #     self.red_rivers.append(river)
+                #     return None
+                    #self.modify_elevation_map_with_lake(p)
+
+                    
             #if (current_height < water_level and is_big_enought(elevation_map, angles2, p)) or end == True:
             #    break
         return river 
@@ -440,7 +282,7 @@ class WorldMap:
                 # print(p3)
                 # print(p4)
 
-                points = plot_line(p1, p2, p3, p4, width)
+                points = hlp.plot_line(p1, p2, p3, p4, width)
                 #print("Points done")
                 for p in points:
                     elevation_map[p[0],p[1]] -= 3 #5 calkiem ok
@@ -456,17 +298,18 @@ class WorldMap:
         return False
 
     def is_big_enought(self, size, elevation_map, angles, p, water_level):
-        px = p[0]
-        py = p[1]
+        px = p[1]
+        py = p[0]
         count = 0
         for angle in angles:            
-            x = px + math.cos(angle)*10
-            y = py + math.sin(angle)*10
+            x = px + math.cos(angle)*20
+            y = py + math.sin(angle)*20
             if x > size[0] or y > size[1] or x <0 or y<0:
                 continue
             if elevation_map[int(y)][int(x)] < water_level:
                 count +=1
-        if count >=4:
+            #self.red_rivers.append(((px,py),(y,x)))
+        if count >=10:
             return True
         return False
 

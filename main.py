@@ -13,8 +13,8 @@ def main():
     #     try:
     print("###########################################")
     size = (800, 800)
-    elevation_seed_index = randrange(0,2)
-    temperature_seed_index = randrange(0,11)
+    elevation_seed_index = randrange(1,10)
+    temperature_seed_index = randrange(1,10)
     elevation_seed = np.loadtxt("elevation_seeds/seed"+str(elevation_seed_index)+".txt")
     temperature_seed = np.loadtxt("temperature_seeds/seed"+str(temperature_seed_index)+".txt")
     scale = get_random_scale()           
@@ -28,11 +28,12 @@ def main():
     #fixed = (1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
     #light_fixed = (1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2)
     # scale = (1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
-    # temperature_factor = 0.06609419514938386
-    # islands_number = 9
-    # heights = [(551, 810), (592, 785), (704, 796), (437, 704), (645, 236), (592, 589), (436, 749), (310, 769), (771, 629)]
+    # temperature_factor = 0.5
+    # islands_number = 10
+    # heights = [(476, 246), (528, 741), (544, 375), (697, 258), (204, 230), (395, 280), (267, 263), (478, 697), (713, 515)]
     # is_rivers = True
-    #scale = (1, 1.3, 1.5, 1.7, 1.9, 2.1, 2.3, 2.5, 2.7, 3)
+    # scale = (1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
+    # water_level = 0.4
     ##############
 
     print("Temperature: "+str(temperature_factor))

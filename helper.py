@@ -1,5 +1,7 @@
 import math
 from random import randrange, uniform
+from colors import *
+import numpy as np
 
 def plot_line(x0, y0, x1, y1, wd):
    dx = abs(x1-x0)
@@ -60,7 +62,7 @@ def plot_line(x0, y0, x1, y1, wd):
             err += dx
             y0 += sy
    return points
-    
+  
 def get_random_scale():
     fixed_scale = (1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
     light_fixed_scale = (1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2)
@@ -78,3 +80,134 @@ def get_random_scale():
         print("Scale: Hard scale")
     scale = scales[i]
     return scale
+   
+cnt = 0
+visited = np.zeros((800,800)) 
+
+def count_water_pixels(strt, graph):
+
+    global cnt 
+    start = (int(strt[0]), int(strt[1]))
+    if cnt >=400:
+        return
+    steps = [(0,1),(1,0),(0,-1),(-1,0)]
+    if visited[start[0]][start[1]] != 1 and graph[start[0]][start[1]]<0:
+        #points.append(start)
+        cnt +=1
+        #print(str(graph[start[0]][start[1]])+" count: "+str(cnt))
+        visited[start[0]][start[1]] = 1
+    else:
+        return
+    if start[0]==0 or start[0]==799 or start[1]==0 or start[1] == 799:
+        return
+    for step in steps:
+        count_water_pixels((start[0]+step[0],start[1]+step[1]), graph)
+
+def set_cnt():
+    global cnt
+    cnt = 0
+
+def get_biome(e, m, water_level, temperature_factor):           
+        if e<water_level:
+            if m > temperature_factor+0.88:
+                return ICE
+            return WATER
+
+        if e<water_level+0.1:
+            if m<temperature_factor+0.8:
+                return BEACH
+            if m<temperature_factor+0.85:
+                return BEACH_COLD
+            return SNOW       
+
+        if e>water_level+3.2:
+            if m < temperature_factor:
+                return DESERT_MOUNTAINS_8
+            if m < temperature_factor+ 0.8:
+                return MOUNTAINS_8
+            else:
+                return COLD_MOUNTAINS_8
+
+        if e>water_level+2.8:
+            if m < temperature_factor:
+                return DESERT_MOUNTAINS_7
+            if m < temperature_factor+ 0.8:
+                return MOUNTAINS_7
+            else:
+                return COLD_MOUNTAINS_7
+
+        if e>water_level+2.5:
+            if m < temperature_factor:
+                return DESERT_MOUNTAINS_6
+            if m < temperature_factor+ 0.8:
+                return MOUNTAINS_6
+            else:
+                return COLD_MOUNTAINS_6
+
+        if e>water_level+2:
+            if m < temperature_factor:
+                return DESERT_MOUNTAINS_5
+            if m < temperature_factor+ 0.8:
+                return MOUNTAINS_5
+            else:
+                return COLD_MOUNTAINS_5
+
+        if e>water_level+1.6:
+            if m < temperature_factor:
+                return DESERT_MOUNTAINS_4
+            if m < temperature_factor+ 0.8:
+                return MOUNTAINS_4
+            else:
+                return COLD_MOUNTAINS_4
+
+        if e>water_level+1.4:
+            if m < temperature_factor:
+                return DESERT_MOUNTAINS_3
+            if m < temperature_factor+ 0.8:
+                return MOUNTAINS_3
+            else:
+                return COLD_MOUNTAINS_3
+
+        if e>water_level+1.3:
+            if m < temperature_factor:
+                return DESERT_MOUNTAINS_OUTLINE
+            if m < temperature_factor+ 0.8:
+                return MOUNTAINS_OUTLINE
+            else:
+                return SNOW
+
+        if e>water_level+1:
+            if m < temperature_factor:
+                return DESERT_MOUNTAINS_2
+            if m < temperature_factor+ 0.8:
+                return MOUNTAINS_2
+            else:
+                return COLD_MOUNTAINS_2
+
+        if e>water_level+0.9:
+            if m < temperature_factor:
+                return DESERT_MOUNTAINS_1
+            if m < temperature_factor+ 0.8:
+                return MOUNTAINS_1
+            else:
+                return COLD_MOUNTAINS_1
+
+        if e>water_level+0.5:
+            if m < temperature_factor:
+                return DESERT
+            if m < temperature_factor +0.85:
+                return FOREST
+            return SNOW
+
+        if e>water_level+0.2:
+            if m < temperature_factor:
+                return DESERT            
+            if m < temperature_factor+0.8:
+                return GRASS
+            return SNOW
+
+        if m < temperature_factor:
+            return DESERT
+        if m < temperature_factor+0.8:
+            return GRASS        
+        return SNOW
