@@ -1,9 +1,13 @@
 import numpy as np
+from main import *
 
-
-for i in range(1,11):
-    elevation_seed = np.loadtxt("elevation_seeds/seed"+str(i)+".txt")
-    mean = np.mean(elevation_seed, axis=0)
-    minimal = np.min(elevation_seed)
-    maximal = np.max(elevation_seed)
-    print(f"Seed{i} min={minimal} max={maximal} avg={minimal}")
+passed = 0
+failed = 0
+for i in range(1,100):
+    try:
+        main()
+        passed += 1
+    except:
+        failed += 1
+        continue
+print(f"Passed: {passed},\nFailed: {failed}")

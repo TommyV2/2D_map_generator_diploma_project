@@ -6,22 +6,25 @@ from PIL import Image, ImageDraw
 import math
 import numpy as np
 
+
 class WorldMap:
     def __init__(self, data):
         self.size = data.size
         self.elevation_map = data.elevation_seed
-        self.temperature_map = data.temperature_seed
+        self.backup_map = None
+        self.temperature_map = data.temperature_seed       
         self.scale = data.scale
         self.is_rivers = data.is_rivers
         self.civilisations = data.civilisations
         self.water_level = data.water_level
         self.temperature_factor = data.temperature_factor
+        self.mountains_factor = data.mountains_factor
+        self.sea_level_factor = data.sea_level_factor
         self.islands_number =  data.islands_number
         self.heights = data.heights
         self.rivers = None
         self.extra_rivers = None
         self.red_rivers = []
-
 
     def generate(self):
         if self.heights == None:
@@ -29,17 +32,24 @@ class WorldMap:
         print("Heights:")
         print(self.heights)      
         self.modify_elevation_map_with_islands()          
-
+        self.backup_map = np.copy(self.elevation_map)
         if self.is_rivers == True:
             #self.generate_rivers(self.size, self.elevation_map, self.water_level)
-            self.generate_rivers(self.size, self.water_level)       
+            self.generate_rivers(self.size, self.water_level, self.sea_level_factor)       
             self.make_rivers_deep(self.rivers, self.elevation_map, 3)
             self.thermal_erosion(self.size, self.elevation_map)
         #self.make_rivers_deep(self.extra_rivers, self.elevation_map, 1)
         #self.hydraulic_erosion(self.size, self.elevation_map, self.rivers)
         #self.draw_map()
         
-        self.draw_map()
+        #self.draw_map()
+    def add_rivers(self):
+        self.generate_rivers(self.size, self.water_level, self.sea_level_factor)       
+        self.make_rivers_deep(self.rivers, self.elevation_map, 3)
+        self.thermal_erosion(self.size, self.elevation_map)
+
+    def cancel_rivers(self):
+        self.elevation_map = np.copy(self.backup_map)
 
     def draw_map(self):
         img = Image.new( 'RGB', self.size, "black")
@@ -49,16 +59,18 @@ class WorldMap:
             for x in range(self.size[0]):
                 e = self.elevation_map[y][x]
                 m = self.temperature_map[y][x]
-                biome= hlp.get_biome(e, m, self.water_level, self.temperature_factor)
+                biome= hlp.get_biome(e, m, self.water_level, self.temperature_factor, self.mountains_factor, self.sea_level_factor)
                 pixels[x,y] = biome
-            if self.red_rivers != []:
-                for red_river in self.red_rivers:
-                    draw.line(red_river, fill=(237,28,36), width=2)
+            # if self.red_rivers != []:
+            #     for red_river in self.red_rivers:
+            #         draw.line(red_river, fill=(237,28,36), width=2)
         # for extra_river in self.extra_rivers:
         #     draw.line(extra_river, fill=WATER, width=3)
-        img.show()
-        img = img.save("generated_maps_22_10/"+str(self.elevation_map[0][0])+".jpg", format='JPEG', subsampling=0, quality=100 )        
+        #img.show()
+        #img = img.save("generated_maps_22_10/"+str(self.elevation_map[0][0])+".jpg", format='JPEG', subsampling=0, quality=100 ) 
+        img = img.save("image.jpg", format='JPEG', subsampling=0, quality=100 )        
         print("Finished drawing map")
+        return 1
         
     def modify_elevation_map_with_islands(self):
         for y in range(self.size[1]):   
@@ -134,7 +146,8 @@ class WorldMap:
             dist = tmp_dist           
         return dist
 
-    def generate_rivers(self, size, water_level):
+    def generate_rivers(self, size, water_level, sea_level_factor):
+        water_level = water_level - sea_level_factor
         elevation_map = self.elevation_map
         rivers_number = randrange(5,15)
         i=0 
@@ -302,8 +315,8 @@ class WorldMap:
         py = p[0]
         count = 0
         for angle in angles:            
-            x = px + math.cos(angle)*20
-            y = py + math.sin(angle)*20
+            x = px + math.cos(angle)*10 #20 
+            y = py + math.sin(angle)*10 #20
             if x > size[0] or y > size[1] or x <0 or y<0:
                 continue
             if elevation_map[int(y)][int(x)] < water_level:

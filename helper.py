@@ -107,7 +107,8 @@ def set_cnt():
     global cnt
     cnt = 0
 
-def get_biome(e, m, water_level, temperature_factor):           
+def get_biome(e, m, water_level, temperature_factor, mountains_factor, sea_level_factor):
+        water_level = water_level - sea_level_factor           
         if e<water_level:
             if m > temperature_factor+0.88:
                 return ICE
@@ -120,7 +121,7 @@ def get_biome(e, m, water_level, temperature_factor):
                 return BEACH_COLD
             return SNOW       
 
-        if e>water_level+3.2:
+        if e>water_level+3.2-mountains_factor:
             if m < temperature_factor:
                 return DESERT_MOUNTAINS_8
             if m < temperature_factor+ 0.8:
@@ -128,7 +129,7 @@ def get_biome(e, m, water_level, temperature_factor):
             else:
                 return COLD_MOUNTAINS_8
 
-        if e>water_level+2.8:
+        if e>water_level+2.8-mountains_factor:
             if m < temperature_factor:
                 return DESERT_MOUNTAINS_7
             if m < temperature_factor+ 0.8:
@@ -136,7 +137,7 @@ def get_biome(e, m, water_level, temperature_factor):
             else:
                 return COLD_MOUNTAINS_7
 
-        if e>water_level+2.5:
+        if e>water_level+2.5-mountains_factor:
             if m < temperature_factor:
                 return DESERT_MOUNTAINS_6
             if m < temperature_factor+ 0.8:
@@ -144,7 +145,7 @@ def get_biome(e, m, water_level, temperature_factor):
             else:
                 return COLD_MOUNTAINS_6
 
-        if e>water_level+2:
+        if e>water_level+2-mountains_factor:
             if m < temperature_factor:
                 return DESERT_MOUNTAINS_5
             if m < temperature_factor+ 0.8:
@@ -152,7 +153,7 @@ def get_biome(e, m, water_level, temperature_factor):
             else:
                 return COLD_MOUNTAINS_5
 
-        if e>water_level+1.6:
+        if e>water_level+1.6-mountains_factor:
             if m < temperature_factor:
                 return DESERT_MOUNTAINS_4
             if m < temperature_factor+ 0.8:
@@ -160,7 +161,7 @@ def get_biome(e, m, water_level, temperature_factor):
             else:
                 return COLD_MOUNTAINS_4
 
-        if e>water_level+1.4:
+        if e>water_level+1.4-mountains_factor:
             if m < temperature_factor:
                 return DESERT_MOUNTAINS_3
             if m < temperature_factor+ 0.8:
@@ -168,7 +169,7 @@ def get_biome(e, m, water_level, temperature_factor):
             else:
                 return COLD_MOUNTAINS_3
 
-        if e>water_level+1.3:
+        if e>water_level+1.3 - mountains_factor:
             if m < temperature_factor:
                 return DESERT_MOUNTAINS_OUTLINE
             if m < temperature_factor+ 0.8:
@@ -176,7 +177,7 @@ def get_biome(e, m, water_level, temperature_factor):
             else:
                 return SNOW
 
-        if e>water_level+1:
+        if e>water_level+1 - mountains_factor:
             if m < temperature_factor:
                 return DESERT_MOUNTAINS_2
             if m < temperature_factor+ 0.8:
@@ -184,7 +185,7 @@ def get_biome(e, m, water_level, temperature_factor):
             else:
                 return COLD_MOUNTAINS_2
 
-        if e>water_level+0.9:
+        if e>water_level+0.9 - mountains_factor:
             if m < temperature_factor:
                 return DESERT_MOUNTAINS_1
             if m < temperature_factor+ 0.8:

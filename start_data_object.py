@@ -13,4 +13,6 @@ class StartDataObject:
     water_level: float
     temperature_factor: float
     islands_number: int
+    mountains_factor: float
+    sea_level_factor: float
     heights: list = None
