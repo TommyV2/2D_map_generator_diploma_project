@@ -108,8 +108,8 @@ def set_cnt():
     cnt = 0
 
 def get_biome(e, m, water_level, temperature_factor, mountains_factor, sea_level_factor):
-        water_level = water_level - sea_level_factor           
-        if e<water_level:
+        water_levell = water_level + sea_level_factor           
+        if e<water_levell:
             if m > temperature_factor+0.88:
                 return ICE
             return WATER

@@ -16,6 +16,8 @@ def main(start_data_object):
     global world_map
     global add_rivers
     finished = False
+    if start_data_object.is_rivers == False:
+        add_rivers = True
     # for i in range(0,50):
     #     try:
     print("###########################################")
@@ -74,7 +76,7 @@ def re_draw(new_temperature, new_mountains, new_sea_level, is_rivers):
     world_map.temperature_factor = new_temperature
     world_map.mountains_factor = new_mountains
     ##
-    if new_sea_level > world_map.sea_level_factor and is_rivers == True:
+    if new_sea_level < world_map.sea_level_factor and is_rivers == True:
         world_map.sea_level_factor = new_sea_level
         world_map.cancel_rivers()
         world_map.add_rivers()

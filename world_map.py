@@ -27,7 +27,7 @@ class WorldMap:
         self.red_rivers = []
 
     def generate(self):
-        if self.heights == None:
+        if self.heights == None or self.heights == []:
             self.heights = self.generate_islands(self.size[0], self.size[1], self.islands_number)        
         print("Heights:")
         print(self.heights)      
@@ -147,7 +147,7 @@ class WorldMap:
         return dist
 
     def generate_rivers(self, size, water_level, sea_level_factor):
-        water_level = water_level - sea_level_factor
+        water_level = water_level + sea_level_factor
         elevation_map = self.elevation_map
         rivers_number = randrange(5,15)
         i=0 

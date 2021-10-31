@@ -9,6 +9,7 @@ TEMPERATURE_BAR_Y = 100
 MOUNTAINS_BAR_Y = TEMPERATURE_BAR_Y + OFFSET
 SEA_LEVEL_BAR_Y = TEMPERATURE_BAR_Y + 2*OFFSET
 IS_RIVERS_BUTTON_Y = TEMPERATURE_BAR_Y + 3*OFFSET
+IS_CIVILIZATIONS_BUTTON_Y = TEMPERATURE_BAR_Y + 4.5*OFFSET
 
 temperature_pointer_x = BARS_X + BAR_LENGTH/2
 selected_temperature = 0.1
@@ -18,6 +19,8 @@ selected_mountains = 0
 
 sea_level_pointer_x = BARS_X + BAR_LENGTH/2
 selected_sea_level = 0
+
+selected_heights = []
 
 def handle_bar_clicked(bars, position):
     for bar in bars:
@@ -31,6 +34,11 @@ def handle_bar_clicked(bars, position):
             elif bar[1] == SEA_LEVEL_BAR_Y:
                 handle_sea_level_bar(position)
                 break
+def handle_map_clicked(map, position):
+    bottom_left = (map[0],map[1]+800)
+    top_right = (map[0]+800,map[1])
+    if is_inside_rect(bottom_left, top_right, position):
+        selected_heights.append((position[1], position[0]))
 
 def is_inside_rect(bottom_left, top_right, point):
     if (point[0] > bottom_left[0] and point[0] < top_right[0] and point[1] < bottom_left[1] and point[1] > top_right[1]):
