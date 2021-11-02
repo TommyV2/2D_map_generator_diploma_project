@@ -10,6 +10,7 @@ MOUNTAINS_BAR_Y = TEMPERATURE_BAR_Y + OFFSET
 SEA_LEVEL_BAR_Y = TEMPERATURE_BAR_Y + 2*OFFSET
 IS_RIVERS_BUTTON_Y = TEMPERATURE_BAR_Y + 3*OFFSET
 IS_CIVILIZATIONS_BUTTON_Y = TEMPERATURE_BAR_Y + 4.5*OFFSET
+SCALE_BUTTON_Y = TEMPERATURE_BAR_Y + 6*OFFSET
 
 temperature_pointer_x = BARS_X + BAR_LENGTH/2
 selected_temperature = 0.1
@@ -21,6 +22,13 @@ sea_level_pointer_x = BARS_X + BAR_LENGTH/2
 selected_sea_level = 0
 
 selected_heights = []
+
+land_scale = (1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
+moderate_scale = (1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2)
+islands_scale = (1, 1.3, 1.5, 1.7, 1.9, 2.1, 2.3, 2.5, 2.7, 3)
+
+selected_scale = moderate_scale
+scale_outline = (BARS_X+1.5*OFFSET ,SCALE_BUTTON_Y)
 
 def handle_bar_clicked(bars, position):
     for bar in bars:
@@ -39,6 +47,24 @@ def handle_map_clicked(map, position):
     top_right = (map[0]+800,map[1])
     if is_inside_rect(bottom_left, top_right, position):
         selected_heights.append((position[1], position[0]))
+
+def handle_scale_clicked(scales_buttons, position):
+    global selected_scale
+    global scale_outline
+    for button in scales_buttons:
+        if is_inside_rect((button[0], button[1]+80), (button[0]+80, button[1]), position):
+            if button[0] == BARS_X:
+                selected_scale = islands_scale
+                scale_outline = (BARS_X, SCALE_BUTTON_Y)
+                break
+            elif button[0] == BARS_X+1.5*OFFSET:
+                selected_scale = moderate_scale
+                scale_outline = (BARS_X+1.5*OFFSET, SCALE_BUTTON_Y)
+                break
+            elif button[0] == BARS_X+3*OFFSET:
+                selected_scale = land_scale
+                scale_outline = (BARS_X+3*OFFSET, SCALE_BUTTON_Y)
+                break
 
 def is_inside_rect(bottom_left, top_right, point):
     if (point[0] > bottom_left[0] and point[0] < top_right[0] and point[1] < bottom_left[1] and point[1] > top_right[1]):
@@ -60,7 +86,7 @@ def handle_temperature_bar(position):
 def handle_mountains_bar(position):
     start = BARS_X
     level = position[0]
-    mountains_spectrum = (-0.8, 0.8)
+    mountains_spectrum = (-1.5, 1.5)
     range = mountains_spectrum[1] - mountains_spectrum[0]
     percent = (level - start) / BAR_LENGTH
     global mountains_pointer_x
@@ -73,7 +99,7 @@ def handle_mountains_bar(position):
 def handle_sea_level_bar(position):
     start = BARS_X
     level = position[0]
-    sea_level_spectrum = (-0.25, 0.25)
+    sea_level_spectrum = (-0.4, 0.4)
     range = sea_level_spectrum[1] - sea_level_spectrum[0]
     percent = (level - start) / BAR_LENGTH
     global sea_level_pointer_x

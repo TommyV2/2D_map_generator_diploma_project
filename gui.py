@@ -8,13 +8,13 @@ from start_data_object import StartDataObject
 from random import randrange, uniform
 from helper import *
 
-def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_factor, is_rivers, selected_heights):
+def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_factor, is_rivers, selected_heights, selected_scale):
     size = (800, 800)
     elevation_seed_index = 1 #randrange(1,2)
     temperature_seed_index = 1 #randrange(1,10)
     elevation_seed =  elevation # np.loadtxt("elevation_seeds/seed"+str(elevation_seed_index)+".txt")
     temperature_seed = np.loadtxt("temperature_seeds/seed"+str(temperature_seed_index)+".txt")
-    scale = get_random_scale()           
+    scale = selected_scale#get_random_scale()           
     is_rivers = is_rivers
     civilisations = False
     water_level = 0.3
@@ -54,6 +54,9 @@ low_png = pygame.image.load("gui_visuals/low.png")
 high_water_png = pygame.image.load("gui_visuals/high_water.png")
 low_water_png = pygame.image.load("gui_visuals/low_water.png")
 height_png = pygame.image.load("gui_visuals/height.png")
+islands_png = pygame.image.load("gui_visuals/islands.png")
+moderate_png = pygame.image.load("gui_visuals/moderate.png")
+land_png = pygame.image.load("gui_visuals/land.png")
 hot_png.convert()
 cold_png.convert()
 high_png.convert()
@@ -61,6 +64,9 @@ low_png.convert()
 high_water_png.convert()
 low_water_png.convert()
 height_png.convert()
+islands_png.convert()
+moderate_png.convert()
+land_png.convert()
 
 # TEMPERATURE
 temperature_bar = pygame.Surface((gui_helpers.BAR_LENGTH, gui_helpers.BAR_WIDTH))
@@ -90,7 +96,13 @@ bars = []
 bars.append((gui_helpers.BARS_X, gui_helpers.TEMPERATURE_BAR_Y))
 bars.append((gui_helpers.BARS_X, gui_helpers.TEMPERATURE_BAR_Y + OFFSET))
 bars.append((gui_helpers.BARS_X, gui_helpers.TEMPERATURE_BAR_Y + 2*OFFSET))
+scale_buttons = []
+scale_buttons.append((gui_helpers.BARS_X, gui_helpers.SCALE_BUTTON_Y+10))
+scale_buttons.append((gui_helpers.BARS_X+1.5*OFFSET, gui_helpers.SCALE_BUTTON_Y+10))
+scale_buttons.append((gui_helpers.BARS_X+3*OFFSET, gui_helpers.SCALE_BUTTON_Y+10))
 
+selected_scale_outline = pygame.Surface((84, 84))
+selected_scale_outline.fill(pygame.Color('#ff0000'))
 
 #manager = pygame_gui.UIManager((width, height))
 manager = pygame_gui.UIManager((width, height), 'theme.json')
@@ -100,6 +112,8 @@ is_rivers_text_2 = myfont2.render("Yes", False, (3, 63, 5))
 is_civilizations = False
 is_civilizations_text = myfont.render('Civilizations', False, (0, 0, 0))
 is_civilizations_text_2 = myfont2.render("Yes", False, (3, 63, 5))
+scale_text = myfont.render('Land type', False, (0, 0, 0))
+status_text = myfont.render("", False, (0, 0, 0))
 
 is_rivers_button_yes = pygame_gui.elements.UIButton(object_id="button" ,relative_rect=pygame.Rect((gui_helpers.BARS_X, gui_helpers.IS_RIVERS_BUTTON_Y), (50, 50)),
                                             text='Yes',
@@ -147,7 +161,7 @@ is_running = True
 finished = 0
 img = None
 temperature_factor = gui_helpers.selected_temperature
-
+show_heights = False
 
 while is_running:
     time_delta = clock.tick(60)/1000.0
@@ -158,14 +172,18 @@ while is_running:
             if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == generate_button: 
                     elevation_seed = np.loadtxt("elevation_seeds/seed"+str(elevation_seed_index)+".txt")
-                    start_data_object = init_data_object(temperature_factor, elevation_seed, mountains_factor, sea_level_factor, is_rivers, selected_heights)
+                    start_data_object = init_data_object(temperature_factor, elevation_seed, mountains_factor, sea_level_factor, is_rivers, selected_heights, selected_scale)
+                    status_text = myfont.render("Loading...", False, (0, 0, 0))
                     thread = Thread(target = main.main, args=(start_data_object,))                  
                     thread.start()
-                    gui_helpers.selected_heights = []
+                    show_heights = False
+                    #gui_helpers.selected_heights = []
                     # thread.join()
-                if event.ui_element == redraw_button:
-                    thread = Thread(target = main.re_draw, args=(temperature_factor,mountains_factor, sea_level_factor, is_rivers,))                  
-                    thread.start() 
+                if event.ui_element == redraw_button: 
+                    status_text = myfont.render("Loading...", False, (0, 0, 0))               
+                    thread = Thread(target = main.re_draw, args=(temperature_factor,mountains_factor, sea_level_factor, is_rivers, selected_heights, ))                  
+                    thread.start()
+                    show_heights = False                                         
                 if event.ui_element == is_rivers_button_yes:
                     is_rivers_text_2 = myfont2.render("Yes", False, (3, 63, 5))
                     is_rivers = True
@@ -181,10 +199,13 @@ while is_running:
         if event.type == pygame.MOUSEBUTTONUP:  
             gui_helpers.handle_bar_clicked(bars, event.pos)
             gui_helpers.handle_map_clicked((30, 40), event.pos)
-            selected_heights = gui_helpers.selected_heights
+            gui_helpers.handle_scale_clicked(scale_buttons, event.pos)
+            selected_heights = main.heights + gui_helpers.selected_heights
             temperature_factor = gui_helpers.selected_temperature
             mountains_factor = gui_helpers.selected_mountains
             sea_level_factor = gui_helpers.selected_sea_level
+            selected_scale = gui_helpers.selected_scale
+            show_heights = True
 
         manager.process_events(event)
 
@@ -217,20 +238,29 @@ while is_running:
     window_surface.blit(is_civilizations_text,(gui_helpers.BARS_X, gui_helpers.IS_CIVILIZATIONS_BUTTON_Y-30))
     window_surface.blit(is_civilizations_text_2,(gui_helpers.BARS_X + 2*OFFSET+20, gui_helpers.IS_CIVILIZATIONS_BUTTON_Y+15))
 
+    window_surface.blit(scale_text,(gui_helpers.BARS_X, gui_helpers.SCALE_BUTTON_Y-30))
+    window_surface.blit(selected_scale_outline,(gui_helpers.scale_outline[0]-2, gui_helpers.scale_outline[1]+8))
+    window_surface.blit(islands_png,(gui_helpers.BARS_X, gui_helpers.SCALE_BUTTON_Y+10))
+    window_surface.blit(moderate_png,(gui_helpers.BARS_X+1.5*OFFSET, gui_helpers.SCALE_BUTTON_Y+10))
+    window_surface.blit(land_png,(gui_helpers.BARS_X+3*OFFSET, gui_helpers.SCALE_BUTTON_Y+10))
+
     manager.draw_ui(window_surface)
     finished = main.finished
     if finished:
-        img = pygame.image.load("image.jpg")
-        img.convert()
-        finished = 0
+        try:
+            img = pygame.image.load("image.jpg")
+            img.convert()
+            finished = 0
+            status_text = myfont.render("Finished", False, (0, 0, 0))
+        except:
+            print("Failed to load img")
 
     if img != None:
         window_surface.blit(img, (30, 40))  
-
-    if gui_helpers.selected_heights != None and gui_helpers.selected_heights!= []:
+    if show_heights:
         for selected_height in selected_heights:
             window_surface.blit(height_png, (selected_height[1], selected_height[0]))
-
+    window_surface.blit(status_text, (400, 6)) 
     pygame.display.update()
 
 

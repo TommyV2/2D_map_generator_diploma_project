@@ -10,11 +10,13 @@ import time
 finished = False    
 world_map = None
 add_rivers = False
+heights = []
 
 def main(start_data_object):
     global finished
     global world_map
     global add_rivers
+    global heights
     finished = False
     if start_data_object.is_rivers == False:
         add_rivers = True
@@ -55,6 +57,7 @@ def main(start_data_object):
     world_map.generate()
     world_map.draw_map()
     finished = True
+    heights = world_map.heights
     end = time.time()
     print("Total generating time: "+ str(end-start) + "s")
     print("###########################################")
@@ -68,7 +71,7 @@ def cancel_rivers():
     world_map.cancel_rivers()
     finished = True
 
-def re_draw(new_temperature, new_mountains, new_sea_level, is_rivers):
+def re_draw(new_temperature, new_mountains, new_sea_level, is_rivers, selected_heights):
     global world_map
     global finished
     global add_rivers
@@ -76,6 +79,14 @@ def re_draw(new_temperature, new_mountains, new_sea_level, is_rivers):
     world_map.temperature_factor = new_temperature
     world_map.mountains_factor = new_mountains
     ##
+    
+    if selected_heights != world_map.heights:
+        world_map.cancel_islands()
+        world_map.heights = selected_heights
+        world_map.add_islands()
+    else:
+        world_map.heights = selected_heights
+
     if new_sea_level < world_map.sea_level_factor and is_rivers == True:
         world_map.sea_level_factor = new_sea_level
         world_map.cancel_rivers()

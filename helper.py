@@ -177,7 +177,7 @@ def get_biome(e, m, water_level, temperature_factor, mountains_factor, sea_level
             else:
                 return SNOW
 
-        if e>water_level+1 - mountains_factor:
+        if e>water_level+1 :#- mountains_factor
             if m < temperature_factor:
                 return DESERT_MOUNTAINS_2
             if m < temperature_factor+ 0.8:
@@ -185,7 +185,7 @@ def get_biome(e, m, water_level, temperature_factor, mountains_factor, sea_level
             else:
                 return COLD_MOUNTAINS_2
 
-        if e>water_level+0.9 - mountains_factor:
+        if e>water_level+0.9 :#- mountains_factor
             if m < temperature_factor:
                 return DESERT_MOUNTAINS_1
             if m < temperature_factor+ 0.8:

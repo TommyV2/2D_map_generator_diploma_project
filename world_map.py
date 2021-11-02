@@ -11,7 +11,8 @@ class WorldMap:
     def __init__(self, data):
         self.size = data.size
         self.elevation_map = data.elevation_seed
-        self.backup_map = None
+        self.backup_rivers_map = None
+        self.backup_islands_map = None
         self.temperature_map = data.temperature_seed       
         self.scale = data.scale
         self.is_rivers = data.is_rivers
@@ -27,29 +28,39 @@ class WorldMap:
         self.red_rivers = []
 
     def generate(self):
+        self.backup_islands_map = np.copy(self.elevation_map)
         if self.heights == None or self.heights == []:
             self.heights = self.generate_islands(self.size[0], self.size[1], self.islands_number)        
         print("Heights:")
         print(self.heights)      
         self.modify_elevation_map_with_islands()          
-        self.backup_map = np.copy(self.elevation_map)
+        self.backup_rivers_map = np.copy(self.elevation_map)
         if self.is_rivers == True:
             #self.generate_rivers(self.size, self.elevation_map, self.water_level)
             self.generate_rivers(self.size, self.water_level, self.sea_level_factor)       
             self.make_rivers_deep(self.rivers, self.elevation_map, 3)
+            #self.make_rivers_deep(self.extra_rivers, self.elevation_map, 2)
             self.thermal_erosion(self.size, self.elevation_map)
         #self.make_rivers_deep(self.extra_rivers, self.elevation_map, 1)
         #self.hydraulic_erosion(self.size, self.elevation_map, self.rivers)
         #self.draw_map()
         
         #self.draw_map()
+    def cancel_islands(self):
+        self.elevation_map = np.copy(self.backup_islands_map)
+
+    def add_islands(self):
+        self.modify_elevation_map_with_islands()
+        self.backup_rivers_map = np.copy(self.elevation_map)     
+
     def add_rivers(self):
         self.generate_rivers(self.size, self.water_level, self.sea_level_factor)       
         self.make_rivers_deep(self.rivers, self.elevation_map, 3)
+        #self.make_rivers_deep(self.extra_rivers, self.elevation_map, 2)
         self.thermal_erosion(self.size, self.elevation_map)
 
     def cancel_rivers(self):
-        self.elevation_map = np.copy(self.backup_map)
+        self.elevation_map = np.copy(self.backup_rivers_map)
 
     def draw_map(self):
         img = Image.new( 'RGB', self.size, "black")
@@ -104,7 +115,8 @@ class WorldMap:
         print("Finished modifying lake")
 
     def islands_function(self, x, y, heights, w, scale):
-        dist = 10000
+        dist = 1000
+        bckp = scale[-5]
         ###
         #w = 800
         ###
@@ -114,11 +126,12 @@ class WorldMap:
             height_y = height[1]
             tmp_dist = math.sqrt( (x-height_x)**2+(y-height_y)**2)
             if tmp_dist <= dist:
-                dist = tmp_dist    
-        if n > 10:
-            dist = 3*dist # 0.55 0 - big 1 - small islands_size
-        else:
-            dist = scale[n-1]*dist
+                dist = tmp_dist  
+        dist = bckp * dist  
+        # if n > 5:
+        #     dist = bckp * dist #3*dist # 0.55 0 - big 1 - small islands_size
+        # else:
+        #     dist = scale[n-1]*dist
         return dist*2/w
 
     def generate_islands(self, width, height, n):
@@ -172,9 +185,10 @@ class WorldMap:
             if river == None:
                 continue
             # connection_points = [i for i in river if elevation_map[int(i[1])][int(i[0])] > water_level]           
-            # if extra > len(connection_points):
-            #      extra = len(connection_points)
-            # extra_points = sample(connection_points, extra) #connection_points[-extra:] #
+            # # if extra > len(connection_points):
+            # #      extra = len(connection_points)
+            # # extra_points = sample(connection_points, extra) #connection_points[-extra:] #
+            # extra_points = connection_points[-extra:]
             rivers.append(river)
             # for extra_point in extra_points:
             #     extra_river = self.generate_river(size, extra_rivers, extra_point, elevation_map, True, water_level)
@@ -182,7 +196,10 @@ class WorldMap:
         self.rivers = rivers
         #self.extra_rivers = extra_rivers
         print("Finished generating rivers")
-             
+
+    def generate_extra_rivers(self, size, water_level, sea_level_factor):
+        water_level = water_level + sea_level_factor
+        elevation_map = self.elevation_map         
 #################################
 # Generating rivers - to refactor
 #################################
@@ -241,7 +258,7 @@ class WorldMap:
             current_y = tmp_y
             p = (current_x, current_y)
             if is_extra_river == True:
-                if self.is_inside_river(rivers, p, 5) == True:
+                if self.is_inside_river(rivers, p, 2) == True:
                     break
             #rivers fix  
             river.append(p)
