@@ -1,3 +1,4 @@
+from itertools import count
 from random import randrange, uniform, sample
 
 from numpy.core.fromnumeric import size
@@ -5,12 +6,14 @@ import helper as hlp
 from PIL import Image, ImageDraw
 import math
 import numpy as np
+import colors
 
 
 class WorldMap:
     def __init__(self, data):
         self.size = data.size
         self.elevation_map = data.elevation_seed
+        self.countries_map = np.copy(data.elevation_seed)
         self.backup_rivers_map = None
         self.backup_islands_map = None
         self.temperature_map = data.temperature_seed       
@@ -23,6 +26,7 @@ class WorldMap:
         self.sea_level_factor = data.sea_level_factor
         self.islands_number =  data.islands_number
         self.heights = data.heights
+        self.countries =  None
         self.rivers = None
         self.extra_rivers = None
         self.red_rivers = []
@@ -35,12 +39,17 @@ class WorldMap:
         print(self.heights)      
         self.modify_elevation_map_with_islands()          
         self.backup_rivers_map = np.copy(self.elevation_map)
-        if self.is_rivers == True:
+        if self.is_rivers:
             #self.generate_rivers(self.size, self.elevation_map, self.water_level)
             self.generate_rivers(self.size, self.water_level, self.sea_level_factor)       
             self.make_rivers_deep(self.rivers, self.elevation_map, 3)
             #self.make_rivers_deep(self.extra_rivers, self.elevation_map, 2)
             self.thermal_erosion(self.size, self.elevation_map)
+        self.countries = self.heights[0:2]
+        if self.civilisations:
+            self.countries = self.create_countries(self.heights, 2)
+            self.create_countries_map(self.heights, self.countries) 
+        print(self.countries_map)
         #self.make_rivers_deep(self.extra_rivers, self.elevation_map, 1)
         #self.hydraulic_erosion(self.size, self.elevation_map, self.rivers)
         #self.draw_map()
@@ -66,12 +75,25 @@ class WorldMap:
         img = Image.new( 'RGB', self.size, "black")
         pixels = img.load()
         draw = ImageDraw.Draw(img)
-        for y in range(self.size[1]):
-            for x in range(self.size[0]):
-                e = self.elevation_map[y][x]
-                m = self.temperature_map[y][x]
-                biome= hlp.get_biome(e, m, self.water_level, self.temperature_factor, self.mountains_factor, self.sea_level_factor)
-                pixels[x,y] = biome
+        if self.civilisations:
+            for y in range(self.size[1]):
+                for x in range(self.size[0]): 
+                    country_index = int(self.countries_map[y][x])
+                    e = self.elevation_map[y][x]
+                    m = self.temperature_map[y][x]
+                    pixel = hlp.get_biome(e, m, self.water_level, self.temperature_factor, self.mountains_factor, self.sea_level_factor)
+                    if pixel == (24, 161, 219) or pixel == (154, 245, 234):
+                        biome = pixel
+                    else:
+                        biome = colors.country_colors[country_index]
+                    pixels[x,y] = biome
+        else:
+            for y in range(self.size[1]):
+                for x in range(self.size[0]):
+                    e = self.elevation_map[y][x]
+                    m = self.temperature_map[y][x]
+                    biome= hlp.get_biome(e, m, self.water_level, self.temperature_factor, self.mountains_factor, self.sea_level_factor)
+                    pixels[x,y] = biome
             # if self.red_rivers != []:
             #     for red_river in self.red_rivers:
             #         draw.line(red_river, fill=(237,28,36), width=2)
@@ -113,6 +135,51 @@ class WorldMap:
                 if(d <= 10):
                     self.elevation_map[y][x] -= self.lake_function(x,y,lake,self.size[0])                
         print("Finished modifying lake")
+
+    def create_countries(self, heights, n):
+        countries = []
+        new_country = ()
+        new_country = new_country + (heights[0],)
+        new_country = new_country + (heights[1],)
+        countries.append(new_country)
+        second_country = ()
+        second_country = second_country + (heights[2],)
+        countries.append(second_country)
+        return countries
+
+    def find_country_index_by_height(self, height, countries):
+        idx = [item for item in countries if height in item]
+        # print("++++++++++")
+        # print(countries)
+        # print(height)
+        # print(idx[0])
+        #country = countries.index(idx[0])
+        country = idx[0]
+        # print("++++++++++")
+        return countries.index(country)
+
+    def create_countries_map(self, heights, countries):       
+        for y in range(self.size[1]):   
+            for x in range(self.size[0]):
+                country_index =  self.countries_function(y, x, heights, countries)
+                self.countries_map[y][x] = country_index
+        print("Finished creating countries map")
+
+    def countries_function(self, x, y, heights, countries): # [(1,1),(2,2)(3,3)] [(1,2)]
+        dist = 1000
+        min = 0
+        n=0
+        for height in heights:
+            height_x = height[0]
+            height_y = height[1]
+            tmp_dist = math.sqrt( (x-height_x)**2+(y-height_y)**2)
+            if tmp_dist <= dist:
+                dist = tmp_dist
+                min = height
+            n+=1    
+
+        country_index = self.find_country_index_by_height(min, countries)
+        return country_index       
 
     def islands_function(self, x, y, heights, w, scale):
         dist = 1000

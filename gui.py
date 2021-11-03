@@ -8,7 +8,7 @@ from start_data_object import StartDataObject
 from random import randrange, uniform
 from helper import *
 
-def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_factor, is_rivers, selected_heights, selected_scale):
+def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_factor, is_rivers, selected_heights, selected_scale, is_civilizations):
     size = (800, 800)
     elevation_seed_index = 1 #randrange(1,2)
     temperature_seed_index = 1 #randrange(1,10)
@@ -16,7 +16,7 @@ def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_
     temperature_seed = np.loadtxt("temperature_seeds/seed"+str(temperature_seed_index)+".txt")
     scale = selected_scale#get_random_scale()           
     is_rivers = is_rivers
-    civilisations = False
+    civilisations = is_civilizations
     water_level = 0.3
     temperature_factor = temperature_factor #-0.6 |snieg| -0.1 |trawa| 0.7 piach
     mountains_factor = mountains_factor
@@ -109,7 +109,7 @@ manager = pygame_gui.UIManager((width, height), 'theme.json')
 is_rivers = True
 is_rivers_text = myfont.render('Rivers', False, (0, 0, 0))
 is_rivers_text_2 = myfont2.render("Yes", False, (3, 63, 5))
-is_civilizations = False
+is_civilizations = True
 is_civilizations_text = myfont.render('Civilizations', False, (0, 0, 0))
 is_civilizations_text_2 = myfont2.render("Yes", False, (3, 63, 5))
 scale_text = myfont.render('Land type', False, (0, 0, 0))
@@ -172,7 +172,7 @@ while is_running:
             if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == generate_button: 
                     elevation_seed = np.loadtxt("elevation_seeds/seed"+str(elevation_seed_index)+".txt")
-                    start_data_object = init_data_object(temperature_factor, elevation_seed, mountains_factor, sea_level_factor, is_rivers, selected_heights, selected_scale)
+                    start_data_object = init_data_object(temperature_factor, elevation_seed, mountains_factor, sea_level_factor, is_rivers, selected_heights, selected_scale, is_civilizations)
                     status_text = myfont.render("Loading...", False, (0, 0, 0))
                     thread = Thread(target = main.main, args=(start_data_object,))                  
                     thread.start()
