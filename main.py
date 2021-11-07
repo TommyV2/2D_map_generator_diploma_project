@@ -71,22 +71,25 @@ def cancel_rivers():
     world_map.cancel_rivers()
     finished = True
 
-def re_draw(new_temperature, new_mountains, new_sea_level, is_rivers, selected_heights):
+def re_draw(new_temperature, new_mountains, new_sea_level, is_rivers, selected_heights, is_civilizations):
     global world_map
     global finished
     global add_rivers
     finished = False
     world_map.temperature_factor = new_temperature
     world_map.mountains_factor = new_mountains
-    ##
+    world_map.civilisations = is_civilizations
     
+    ##
+    world_map.redraw_civilizations()
+
     if selected_heights != world_map.heights:
         world_map.cancel_islands()
         world_map.heights = selected_heights
         world_map.add_islands()
     else:
         world_map.heights = selected_heights
-
+    
     if new_sea_level < world_map.sea_level_factor and is_rivers == True:
         world_map.sea_level_factor = new_sea_level
         world_map.cancel_rivers()

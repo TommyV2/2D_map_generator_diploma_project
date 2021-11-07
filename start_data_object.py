@@ -16,3 +16,4 @@ class StartDataObject:
     mountains_factor: float
     sea_level_factor: float
     heights: list = None
+    civs: list = None

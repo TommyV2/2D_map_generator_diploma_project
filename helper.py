@@ -215,105 +215,119 @@ def get_biome(e, m, water_level, temperature_factor, mountains_factor, sea_level
 def get_civilizations_color(e, m, water_level, temperature_factor, mountains_factor, sea_level_factor, country_color):
         water_levell = water_level + sea_level_factor           
         if e<water_levell:
-            if m > temperature_factor+0.88:
-                return ICE
             return WATER
+            # if m > temperature_factor+0.88:
+            #     return ICE
+            # return WATER
 
         if e<water_level+0.1:
-            if m<temperature_factor+0.8:
-                return BEACH
-            if m<temperature_factor+0.85:
-                return BEACH_COLD
-            return SNOW       
+            if country_color == (255, 0, 0):
+                return RED_1
+            if country_color == (0, 0, 204):
+                return BLUE_1
+            if country_color == (70, 70, 70):
+                return (70, 70, 70)
+            return (153, 0, 204)      
 
-        if e>water_level+3.2-mountains_factor:
-            if m < temperature_factor:
-                return DESERT_MOUNTAINS_8
-            if m < temperature_factor+ 0.8:
-                return MOUNTAINS_8
-            else:
-                return COLD_MOUNTAINS_8
+        # if e>water_level+3.2-mountains_factor:
+        #     if country_color == (255, 0, 0):
+        #         return RED_1
+        #     if country_color == (0, 0, 204):
+        #         return (0, 0, 204)
+        #     return (153, 0, 204) 
 
-        if e>water_level+2.8-mountains_factor:
-            if m < temperature_factor:
-                return DESERT_MOUNTAINS_7
-            if m < temperature_factor+ 0.8:
-                return MOUNTAINS_7
-            else:
-                return COLD_MOUNTAINS_7
+        # if e>water_level+2.8-mountains_factor:
+        #     if country_color == (255, 0, 0):
+        #         return RED_1
+        #     if country_color == (0, 0, 204):
+        #         return (0, 0, 204)
+        #     return (153, 0, 204) 
 
         if e>water_level+2.5-mountains_factor:
-            if m < temperature_factor:
-                return DESERT_MOUNTAINS_6
-            if m < temperature_factor+ 0.8:
-                return MOUNTAINS_6
-            else:
-                return COLD_MOUNTAINS_6
+            if country_color == (255, 0, 0):
+                return RED_8
+            if country_color == (0, 0, 204):
+                return BLUE_8
+            if country_color == (70, 70, 70):
+                return (70, 70, 70)
+            return (153, 0, 204) 
 
         if e>water_level+2-mountains_factor:
-            if m < temperature_factor:
-                return DESERT_MOUNTAINS_5
-            if m < temperature_factor+ 0.8:
-                return MOUNTAINS_5
-            else:
-                return COLD_MOUNTAINS_5
+            if country_color == (255, 0, 0):
+                return RED_7
+            if country_color == (0, 0, 204):
+                return BLUE_7
+            if country_color == (70, 70, 70):
+                return (70, 70, 70)
+            return (153, 0, 204) 
 
         if e>water_level+1.6-mountains_factor:
-            if m < temperature_factor:
-                return DESERT_MOUNTAINS_4
-            if m < temperature_factor+ 0.8:
-                return MOUNTAINS_4
-            else:
-                return COLD_MOUNTAINS_4
+            if country_color == (255, 0, 0):
+                return RED_6
+            if country_color == (0, 0, 204):
+                return BLUE_6
+            if country_color == (70, 70, 70):
+                return (70, 70, 70)
+            return (153, 0, 204) 
 
         if e>water_level+1.4-mountains_factor:
-            if m < temperature_factor:
-                return DESERT_MOUNTAINS_3
-            if m < temperature_factor+ 0.8:
-                return MOUNTAINS_3
-            else:
-                return COLD_MOUNTAINS_3
+            if country_color == (255, 0, 0):
+                return RED_5
+            if country_color == (0, 0, 204):
+                return BLUE_5
+            if country_color == (70, 70, 70):
+                return (70, 70, 70)
+            return (153, 0, 204) 
 
         if e>water_level+1.3 - mountains_factor:
-            if m < temperature_factor:
-                return DESERT_MOUNTAINS_OUTLINE
-            if m < temperature_factor+ 0.8:
-                return MOUNTAINS_OUTLINE
-            else:
-                return SNOW
+            if country_color == (255, 0, 0):
+                return RED_4
+            if country_color == (0, 0, 204):
+                return BLUE_4
+            if country_color == (70, 70, 70):
+                return (70, 70, 70)
+            return (153, 0, 204) 
 
         if e>water_level+1 :#- mountains_factor
-            if m < temperature_factor:
-                return DESERT_MOUNTAINS_2
-            if m < temperature_factor+ 0.8:
-                return MOUNTAINS_2
-            else:
-                return COLD_MOUNTAINS_2
+            if country_color == (255, 0, 0):
+                return RED_3
+            if country_color == (0, 0, 204):
+                return BLUE_3
+            if country_color == (70, 70, 70):
+                return (70, 70, 70)
+            return (153, 0, 204) 
 
         if e>water_level+0.9 :#- mountains_factor
-            if m < temperature_factor:
-                return DESERT_MOUNTAINS_1
-            if m < temperature_factor+ 0.8:
-                return MOUNTAINS_1
-            else:
-                return COLD_MOUNTAINS_1
+            if country_color == (255, 0, 0):
+                return RED_2
+            if country_color == (0, 0, 204):
+                return BLUE_2
+            if country_color == (70, 70, 70):
+                return (70, 70, 70)
+            return (153, 0, 204) 
 
         if e>water_level+0.5:
-            if m < temperature_factor:
-                return DESERT
-            if m < temperature_factor +0.85:
-                return FOREST
-            return SNOW
+            if country_color == (255, 0, 0):
+                return RED_2
+            if country_color == (0, 0, 204):
+                return BLUE_2
+            if country_color == (70, 70, 70):
+                return (70, 70, 70)
+            return (153, 0, 204) 
 
         if e>water_level+0.2:
-            if m < temperature_factor:
-                return DESERT            
-            if m < temperature_factor+0.8:
-                return GRASS
-            return SNOW
+            if country_color == (255, 0, 0):
+                return RED_2
+            if country_color == (0, 0, 204):
+                return BLUE_2
+            if country_color == (70, 70, 70):
+                return (70, 70, 70)
+            return (153, 0, 204) 
 
-        if m < temperature_factor:
-            return DESERT
-        if m < temperature_factor+0.8:
-            return GRASS        
-        return SNOW
+        if country_color == (255, 0, 0):
+            return RED_2
+        if country_color == (0, 0, 204):
+            return BLUE_2
+        if country_color == (70, 70, 70):
+                return (70, 70, 70)
+        return (153, 0, 204) 

@@ -7,8 +7,9 @@ import gui_helpers
 from start_data_object import StartDataObject
 from random import randrange, uniform
 from helper import *
+import test2
 
-def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_factor, is_rivers, selected_heights, selected_scale, is_civilizations):
+def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_factor, is_rivers, selected_heights, selected_scale, is_civilizations, civs):
     size = (800, 800)
     elevation_seed_index = 1 #randrange(1,2)
     temperature_seed_index = 1 #randrange(1,10)
@@ -23,8 +24,9 @@ def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_
     sea_level_factor = sea_level_factor
     islands_number = randrange(1,10)
     heights = selected_heights
+    civs = civs
     data_object = StartDataObject(size, elevation_seed, temperature_seed, scale, is_rivers, 
-        civilisations, water_level, temperature_factor, islands_number, mountains_factor, sea_level_factor, heights) 
+        civilisations, water_level, temperature_factor, islands_number, mountains_factor, sea_level_factor, heights, civs) 
     return data_object
 
 pygame.init()
@@ -33,7 +35,7 @@ myfont = pygame.font.SysFont('lucidaconsole', 22)
 myfont2 = pygame.font.SysFont('lucidaconsole', 22, bold=True)
 ##### GUI ELEMENTS #############################################################
 pygame.display.set_caption('Map generator')
-
+test2.prepare()
 width = 1200
 height = 870
 window_surface = pygame.display.set_mode((width, height))
@@ -153,6 +155,7 @@ water_level = 0.3
 temperature_factor = uniform(-0.6,0.8) #-0.6 |snieg| -0.1 |trawa| 0.7 piach
 islands_number = randrange(1,10)
 heights = None
+civs = None
 selected_heights = None
 #################################################################################
 
@@ -172,16 +175,17 @@ while is_running:
             if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == generate_button: 
                     elevation_seed = np.loadtxt("elevation_seeds/seed"+str(elevation_seed_index)+".txt")
-                    start_data_object = init_data_object(temperature_factor, elevation_seed, mountains_factor, sea_level_factor, is_rivers, selected_heights, selected_scale, is_civilizations)
+                    start_data_object = init_data_object(temperature_factor, elevation_seed, mountains_factor, sea_level_factor, is_rivers, selected_heights, selected_scale, is_civilizations, civs)
                     status_text = myfont.render("Loading...", False, (0, 0, 0))
                     thread = Thread(target = main.main, args=(start_data_object,))                  
                     thread.start()
                     show_heights = False
+                    gui_helpers.selected_civs_initialized = True
                     #gui_helpers.selected_heights = []
                     # thread.join()
                 if event.ui_element == redraw_button: 
-                    status_text = myfont.render("Loading...", False, (0, 0, 0))               
-                    thread = Thread(target = main.re_draw, args=(temperature_factor,mountains_factor, sea_level_factor, is_rivers, selected_heights, ))                  
+                    status_text = myfont.render("Loading...", False, (0, 0, 0))            
+                    thread = Thread(target = main.re_draw, args=(temperature_factor,mountains_factor, sea_level_factor, is_rivers, selected_heights,is_civilizations, ))                  
                     thread.start()
                     show_heights = False                                         
                 if event.ui_element == is_rivers_button_yes:
@@ -200,7 +204,9 @@ while is_running:
             gui_helpers.handle_bar_clicked(bars, event.pos)
             gui_helpers.handle_map_clicked((30, 40), event.pos)
             gui_helpers.handle_scale_clicked(scale_buttons, event.pos)
+            civs = gui_helpers.selected_civs
             selected_heights = main.heights + gui_helpers.selected_heights
+            
             temperature_factor = gui_helpers.selected_temperature
             mountains_factor = gui_helpers.selected_mountains
             sea_level_factor = gui_helpers.selected_sea_level

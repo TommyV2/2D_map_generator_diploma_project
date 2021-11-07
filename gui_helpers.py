@@ -22,6 +22,8 @@ sea_level_pointer_x = BARS_X + BAR_LENGTH/2
 selected_sea_level = 0
 
 selected_heights = []
+selected_civs = []
+selected_civs_initialized = False
 
 land_scale = (1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
 moderate_scale = (1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2)
@@ -47,6 +49,9 @@ def handle_map_clicked(map, position):
     top_right = (map[0]+800,map[1])
     if is_inside_rect(bottom_left, top_right, position):
         selected_heights.append((position[1], position[0]))
+        if selected_civs_initialized == False:
+            selected_civs.append((position[1], position[0]))
+        
 
 def handle_scale_clicked(scales_buttons, position):
     global selected_scale

@@ -7,10 +7,12 @@ from PIL import Image, ImageDraw
 import math
 import numpy as np
 import colors
+import test
 
 
 class WorldMap:
     def __init__(self, data):
+        global civs_loaded
         self.size = data.size
         self.elevation_map = data.elevation_seed
         self.countries_map = np.copy(data.elevation_seed)
@@ -26,10 +28,14 @@ class WorldMap:
         self.sea_level_factor = data.sea_level_factor
         self.islands_number =  data.islands_number
         self.heights = data.heights
+
         self.countries =  None
         self.rivers = None
         self.extra_rivers = None
-        self.red_rivers = []
+        self.country_regions_list = None
+        self.red_rivers = []        
+        self.civs = data.civs
+        # test2.prepare()
 
     def generate(self):
         self.backup_islands_map = np.copy(self.elevation_map)
@@ -47,14 +53,19 @@ class WorldMap:
             self.thermal_erosion(self.size, self.elevation_map)
         self.countries = self.heights[0:2]
         if self.civilisations:
-            self.countries = self.create_countries(self.heights, 2)
-            self.create_countries_map(self.heights, self.countries) 
-        print(self.countries_map)
+            #self.countries = self.create_countries(self.heights, 2)
+            self.create_countries_map(self.civs, self.countries)         
         #self.make_rivers_deep(self.extra_rivers, self.elevation_map, 1)
         #self.hydraulic_erosion(self.size, self.elevation_map, self.rivers)
         #self.draw_map()
         
         #self.draw_map()
+    def redraw_civilizations(self):
+        # print(self.countries)
+        # l = int(len(self.heights)/2)
+        # heig = self.heights[:l]
+        self.create_countries_map(self.civs, self.countries)
+
     def cancel_islands(self):
         self.elevation_map = np.copy(self.backup_islands_map)
 
@@ -75,18 +86,24 @@ class WorldMap:
         img = Image.new( 'RGB', self.size, "black")
         pixels = img.load()
         draw = ImageDraw.Draw(img)
+        print(self.civilisations)
         if self.civilisations:
             for y in range(self.size[1]):
-                for x in range(self.size[0]): 
-                    country_index = int(self.countries_map[y][x])
+                for x in range(self.size[0]):
+                    #country_index = int(self.countries_map[y][x])
+                    country_region = int(self.countries_map[y][x])
+                    idx = [i for i,item in enumerate(self.country_regions_list) if country_region in item]
+                    country_index = idx[0]
+                    country_color = colors.country_colors[country_index]
                     e = self.elevation_map[y][x]
                     m = self.temperature_map[y][x]
-                    pixel = hlp.get_biome(e, m, self.water_level, self.temperature_factor, self.mountains_factor, self.sea_level_factor)
-                    if pixel == (24, 161, 219) or pixel == (154, 245, 234):
-                        biome = pixel
-                    else:
-                        biome = colors.country_colors[country_index]
-                    pixels[x,y] = biome
+                    pixel = hlp.get_civilizations_color(e, m, self.water_level, self.temperature_factor, self.mountains_factor, self.sea_level_factor, country_color)
+                    # pixel = hlp.get_biome(e, m, self.water_level, self.temperature_factor, self.mountains_factor, self.sea_level_factor)
+                    # if pixel == (24, 161, 219) or pixel == (154, 245, 234):
+                    #     biome = pixel
+                    # else:
+                    #     biome = colors.country_colors[country_index]
+                    pixels[x,y] = pixel
         else:
             for y in range(self.size[1]):
                 for x in range(self.size[0]):
@@ -158,11 +175,14 @@ class WorldMap:
         # print("++++++++++")
         return countries.index(country)
 
-    def create_countries_map(self, heights, countries):       
-        for y in range(self.size[1]):   
-            for x in range(self.size[0]):
-                country_index =  self.countries_function(y, x, heights, countries)
-                self.countries_map[y][x] = country_index
+    def create_countries_map(self, heights, countries):
+        test.calculate_country_borders(heights)
+        # for y in range(self.size[1]):   
+        #     for x in range(self.size[0]):
+        #         country_index =  self.countries_function(y, x, heights, countries)
+        #         self.countries_map[y][x] = country_index
+        self.countries_map = test.world
+        self.country_regions_list = test.country_regions_list
         print("Finished creating countries map")
 
     def countries_function(self, x, y, heights, countries): # [(1,1),(2,2)(3,3)] [(1,2)]
