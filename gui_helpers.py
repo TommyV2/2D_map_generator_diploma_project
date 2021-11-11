@@ -104,7 +104,7 @@ def handle_mountains_bar(position):
 def handle_sea_level_bar(position):
     start = BARS_X
     level = position[0]
-    sea_level_spectrum = (-0.4, 0.4)
+    sea_level_spectrum = (-0.3, 0.3)
     range = sea_level_spectrum[1] - sea_level_spectrum[0]
     percent = (level - start) / BAR_LENGTH
     global sea_level_pointer_x

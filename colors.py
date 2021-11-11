@@ -1,8 +1,11 @@
+from PIL import Image, ImageDraw
+
 #Biomes:
 WATER = (24, 161, 219)
 ICE = (154, 245, 234)
 BEACH = (185, 196, 100)
 BEACH_COLD = (215, 215, 193)
+BEACH_HOT = (254, 210, 107)
 DESERT = (161, 121, 63)
 GRASS = (107, 171, 65)
 ROCKS = (176, 164, 146)
@@ -163,5 +166,38 @@ BLUE_6 = (0,0,94)
 BLUE_7 = (0,0,55)
 BLUE_8 = (0,0,26)
 
+GREEN_1 = (202,255,206)
+GREEN_2 = (133,254,142)
+GREEN_3 = (101,255,113)
+GREEN_4 = (14,255,32)
+GREEN_5 = (1,120,10)
+GREEN_6 = (1,78,6)
+GREEN_7 = (0,47,3)
+GREEN_8 = (0,28,2)
+
+PINK_1 = (254,184,252)
+PINK_2 = (254,139,251)
+PINK_3 = (254,107,251)
+PINK_4 = (254,14,248)
+PINK_5 = (131,1,128)
+PINK_6 = (101,1,99)
+PINK_7 = (73,1,71)
+PINK_8 = (52,1,51)
+
 country_colors = [(255, 0, 0), (0, 0, 204), (153, 0, 204), (70, 70, 70)]
 
+#city_colors = [(23,0,0), (0,0,26), (52,1,51), (0,28,2)]
+
+blue_capital = Image.open("gui_visuals/blue_capital.png", 'r')
+blue_normal = Image.open("gui_visuals/blue_normal.png", 'r')
+
+red_capital = Image.open("gui_visuals/red_capital.png", 'r')
+red_normal = Image.open("gui_visuals/red_normal.png", 'r')
+
+pink_capital = Image.open("gui_visuals/pink_capital.png", 'r')
+pink_normal = Image.open("gui_visuals/pink_normal.png", 'r')
+
+green_capital = Image.open("gui_visuals/green_capital.png", 'r')
+green_normal = Image.open("gui_visuals/green_normal.png", 'r')
+
+city_colors = [(red_capital, red_normal), (blue_capital, blue_normal),(pink_capital, pink_normal),(green_capital, green_normal)]

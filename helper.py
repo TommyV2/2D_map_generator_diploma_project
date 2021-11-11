@@ -113,7 +113,9 @@ def get_biome(e, m, water_level, temperature_factor, mountains_factor, sea_level
                 return ICE
             return WATER
 
-        if e<water_level+0.1:
+        if e<water_levell+0.1:
+            if m<temperature_factor:
+                return BEACH_HOT
             if m<temperature_factor+0.8:
                 return BEACH
             if m<temperature_factor+0.85:
@@ -199,7 +201,7 @@ def get_biome(e, m, water_level, temperature_factor, mountains_factor, sea_level
                 return FOREST
             return SNOW
 
-        if e>water_level+0.2:
+        if e>water_levell+0.2:
             if m < temperature_factor:
                 return DESERT            
             if m < temperature_factor+0.8:
@@ -220,14 +222,14 @@ def get_civilizations_color(e, m, water_level, temperature_factor, mountains_fac
             #     return ICE
             # return WATER
 
-        if e<water_level+0.1:
+        if e<water_levell+0.1:
             if country_color == (255, 0, 0):
                 return RED_1
             if country_color == (0, 0, 204):
                 return BLUE_1
             if country_color == (70, 70, 70):
-                return (70, 70, 70)
-            return (153, 0, 204)      
+                return GREEN_1
+            return PINK_1      
 
         # if e>water_level+3.2-mountains_factor:
         #     if country_color == (255, 0, 0):
@@ -249,8 +251,8 @@ def get_civilizations_color(e, m, water_level, temperature_factor, mountains_fac
             if country_color == (0, 0, 204):
                 return BLUE_8
             if country_color == (70, 70, 70):
-                return (70, 70, 70)
-            return (153, 0, 204) 
+                return GREEN_8
+            return PINK_8  
 
         if e>water_level+2-mountains_factor:
             if country_color == (255, 0, 0):
@@ -258,8 +260,8 @@ def get_civilizations_color(e, m, water_level, temperature_factor, mountains_fac
             if country_color == (0, 0, 204):
                 return BLUE_7
             if country_color == (70, 70, 70):
-                return (70, 70, 70)
-            return (153, 0, 204) 
+                return GREEN_7
+            return PINK_7  
 
         if e>water_level+1.6-mountains_factor:
             if country_color == (255, 0, 0):
@@ -267,8 +269,8 @@ def get_civilizations_color(e, m, water_level, temperature_factor, mountains_fac
             if country_color == (0, 0, 204):
                 return BLUE_6
             if country_color == (70, 70, 70):
-                return (70, 70, 70)
-            return (153, 0, 204) 
+                return GREEN_6
+            return PINK_6  
 
         if e>water_level+1.4-mountains_factor:
             if country_color == (255, 0, 0):
@@ -276,8 +278,8 @@ def get_civilizations_color(e, m, water_level, temperature_factor, mountains_fac
             if country_color == (0, 0, 204):
                 return BLUE_5
             if country_color == (70, 70, 70):
-                return (70, 70, 70)
-            return (153, 0, 204) 
+                return GREEN_5
+            return PINK_5  
 
         if e>water_level+1.3 - mountains_factor:
             if country_color == (255, 0, 0):
@@ -285,8 +287,8 @@ def get_civilizations_color(e, m, water_level, temperature_factor, mountains_fac
             if country_color == (0, 0, 204):
                 return BLUE_4
             if country_color == (70, 70, 70):
-                return (70, 70, 70)
-            return (153, 0, 204) 
+                return GREEN_4
+            return PINK_4  
 
         if e>water_level+1 :#- mountains_factor
             if country_color == (255, 0, 0):
@@ -294,8 +296,8 @@ def get_civilizations_color(e, m, water_level, temperature_factor, mountains_fac
             if country_color == (0, 0, 204):
                 return BLUE_3
             if country_color == (70, 70, 70):
-                return (70, 70, 70)
-            return (153, 0, 204) 
+                return GREEN_3
+            return PINK_3  
 
         if e>water_level+0.9 :#- mountains_factor
             if country_color == (255, 0, 0):
@@ -303,8 +305,8 @@ def get_civilizations_color(e, m, water_level, temperature_factor, mountains_fac
             if country_color == (0, 0, 204):
                 return BLUE_2
             if country_color == (70, 70, 70):
-                return (70, 70, 70)
-            return (153, 0, 204) 
+                return GREEN_2
+            return PINK_2  
 
         if e>water_level+0.5:
             if country_color == (255, 0, 0):
@@ -312,22 +314,22 @@ def get_civilizations_color(e, m, water_level, temperature_factor, mountains_fac
             if country_color == (0, 0, 204):
                 return BLUE_2
             if country_color == (70, 70, 70):
-                return (70, 70, 70)
-            return (153, 0, 204) 
+                return GREEN_2
+            return PINK_2  
 
-        if e>water_level+0.2:
+        if e>water_levell+0.2:
             if country_color == (255, 0, 0):
                 return RED_2
             if country_color == (0, 0, 204):
                 return BLUE_2
             if country_color == (70, 70, 70):
-                return (70, 70, 70)
-            return (153, 0, 204) 
+                return GREEN_2
+            return PINK_2  
 
         if country_color == (255, 0, 0):
             return RED_2
         if country_color == (0, 0, 204):
             return BLUE_2
         if country_color == (70, 70, 70):
-                return (70, 70, 70)
-        return (153, 0, 204) 
+            return GREEN_2
+        return PINK_2 

@@ -81,7 +81,8 @@ def re_draw(new_temperature, new_mountains, new_sea_level, is_rivers, selected_h
     world_map.civilisations = is_civilizations
     
     ##
-    world_map.redraw_civilizations()
+    if is_civilizations:
+        world_map.redraw_civilizations()
 
     if selected_heights != world_map.heights:
         world_map.cancel_islands()

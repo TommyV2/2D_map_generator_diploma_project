@@ -8,6 +8,9 @@ from start_data_object import StartDataObject
 from random import randrange, uniform
 from helper import *
 import test2
+import random
+
+MAX_CIVS = 4
 
 def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_factor, is_rivers, selected_heights, selected_scale, is_civilizations, civs):
     size = (800, 800)
@@ -24,7 +27,21 @@ def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_
     sea_level_factor = sea_level_factor
     islands_number = randrange(1,10)
     heights = selected_heights
+    if heights == None or heights == []:
+        for i in range(islands_number):
+            x = randrange(0+width/10,width-width/10) 
+            y = randrange(0+height/10,height-height/10)  
+            h = (x,y)
+            heights.append(h)
+
     civs = civs
+    if civs == None or civs == []:
+        n = random.randint(2,MAX_CIVS)
+        n=2
+        civs = heights[:n]
+
+    elif len(civs) > MAX_CIVS:
+        civs = civs[:MAX_CIVS]
     data_object = StartDataObject(size, elevation_seed, temperature_seed, scale, is_rivers, 
         civilisations, water_level, temperature_factor, islands_number, mountains_factor, sea_level_factor, heights, civs) 
     return data_object
@@ -48,7 +65,6 @@ display1 = pygame.Surface((820, 820))
 display1.fill(pygame.Color('#2b2929'))
 display2 = pygame.Surface((800, 800))
 display2.fill(pygame.Color('#cdc8e0'))
-
 hot_png = pygame.image.load("gui_visuals/hot.png")
 cold_png = pygame.image.load("gui_visuals/cold.png")
 high_png = pygame.image.load("gui_visuals/high.png")
