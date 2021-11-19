@@ -10,6 +10,7 @@ class StartDataObject:
     scale: tuple
     is_rivers: bool
     civilisations: bool
+    borders: bool
     water_level: float
     temperature_factor: float
     islands_number: int

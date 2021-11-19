@@ -7,12 +7,12 @@ import gui_helpers
 from start_data_object import StartDataObject
 from random import randrange, uniform
 from helper import *
-import test2
+import prepare_voronoi
 import random
 
 MAX_CIVS = 4
 
-def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_factor, is_rivers, selected_heights, selected_scale, is_civilizations, civs):
+def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_factor, is_rivers, selected_heights, selected_scale, is_civilizations, civs, is_borders):
     size = (800, 800)
     elevation_seed_index = 1 #randrange(1,2)
     temperature_seed_index = 1 #randrange(1,10)
@@ -27,6 +27,7 @@ def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_
     sea_level_factor = sea_level_factor
     islands_number = randrange(1,10)
     heights = selected_heights
+    borders = is_borders
     if heights == None or heights == []:
         for i in range(islands_number):
             x = randrange(0+width/10,width-width/10) 
@@ -43,7 +44,7 @@ def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_
     elif len(civs) > MAX_CIVS:
         civs = civs[:MAX_CIVS]
     data_object = StartDataObject(size, elevation_seed, temperature_seed, scale, is_rivers, 
-        civilisations, water_level, temperature_factor, islands_number, mountains_factor, sea_level_factor, heights, civs) 
+        civilisations, borders, water_level, temperature_factor, islands_number, mountains_factor, sea_level_factor, heights, civs) 
     return data_object
 
 pygame.init()
@@ -52,7 +53,7 @@ myfont = pygame.font.SysFont('lucidaconsole', 22)
 myfont2 = pygame.font.SysFont('lucidaconsole', 22, bold=True)
 ##### GUI ELEMENTS #############################################################
 pygame.display.set_caption('Map generator')
-test2.prepare()
+prepare_voronoi.prepare()
 width = 1200
 height = 870
 window_surface = pygame.display.set_mode((width, height))
@@ -130,6 +131,9 @@ is_rivers_text_2 = myfont2.render("Yes", False, (3, 63, 5))
 is_civilizations = True
 is_civilizations_text = myfont.render('Civilizations', False, (0, 0, 0))
 is_civilizations_text_2 = myfont2.render("Yes", False, (3, 63, 5))
+is_borders = True
+is_borders_text = myfont.render('Borders', False, (0, 0, 0))
+is_borders_text_2 = myfont2.render("Yes", False, (3, 63, 5))
 scale_text = myfont.render('Land type', False, (0, 0, 0))
 status_text = myfont.render("", False, (0, 0, 0))
 
@@ -147,7 +151,14 @@ is_civilisations_button_yes = pygame_gui.elements.UIButton(object_id="button" ,r
 
 is_civilisations_button_no = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((gui_helpers.BARS_X + OFFSET, gui_helpers.IS_CIVILIZATIONS_BUTTON_Y), (50, 50)),
                                             text='No',
-                                            manager=manager)                               
+                                            manager=manager)
+is_borders_button_yes = pygame_gui.elements.UIButton(object_id="button" ,relative_rect=pygame.Rect((gui_helpers.BARS_X, gui_helpers.IS_BORDERS_BUTTON_Y), (50, 50)),
+                                            text='Yes',
+                                            manager=manager)
+
+is_borders_button_no = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((gui_helpers.BARS_X + OFFSET, gui_helpers.IS_BORDERS_BUTTON_Y), (50, 50)),
+                                            text='No',
+                                            manager=manager)                                
 
 generate_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((width-200, ENDLINE-50), (100, 50)),
                                             text='Generate',
@@ -191,7 +202,7 @@ while is_running:
             if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == generate_button: 
                     elevation_seed = np.loadtxt("elevation_seeds/seed"+str(elevation_seed_index)+".txt")
-                    start_data_object = init_data_object(temperature_factor, elevation_seed, mountains_factor, sea_level_factor, is_rivers, selected_heights, selected_scale, is_civilizations, civs)
+                    start_data_object = init_data_object(temperature_factor, elevation_seed, mountains_factor, sea_level_factor, is_rivers, selected_heights, selected_scale, is_civilizations,civs, is_borders,  )
                     status_text = myfont.render("Loading...", False, (0, 0, 0))
                     thread = Thread(target = main.main, args=(start_data_object,))                  
                     thread.start()
@@ -201,7 +212,7 @@ while is_running:
                     # thread.join()
                 if event.ui_element == redraw_button: 
                     status_text = myfont.render("Loading...", False, (0, 0, 0))            
-                    thread = Thread(target = main.re_draw, args=(temperature_factor,mountains_factor, sea_level_factor, is_rivers, selected_heights,is_civilizations, ))                  
+                    thread = Thread(target = main.re_draw, args=(temperature_factor,mountains_factor, sea_level_factor, is_rivers, selected_heights,is_civilizations, is_borders, ))                  
                     thread.start()
                     show_heights = False                                         
                 if event.ui_element == is_rivers_button_yes:
@@ -215,7 +226,13 @@ while is_running:
                     is_civilizations = True
                 if event.ui_element == is_civilisations_button_no:
                     is_civilizations = False 
-                    is_civilizations_text_2 = myfont2.render("No", False, (159, 35, 16))                      
+                    is_civilizations_text_2 = myfont2.render("No", False, (159, 35, 16))
+                if event.ui_element == is_borders_button_yes:
+                    is_borders_text_2 = myfont2.render("Yes", False, (3, 63, 5))
+                    is_borders = True
+                if event.ui_element ==is_borders_button_no:
+                    is_borders = False 
+                    is_borders_text_2 = myfont2.render("No", False, (159, 35, 16))                         
         if event.type == pygame.MOUSEBUTTONUP:  
             gui_helpers.handle_bar_clicked(bars, event.pos)
             gui_helpers.handle_map_clicked((30, 40), event.pos)
@@ -259,6 +276,9 @@ while is_running:
 
     window_surface.blit(is_civilizations_text,(gui_helpers.BARS_X, gui_helpers.IS_CIVILIZATIONS_BUTTON_Y-30))
     window_surface.blit(is_civilizations_text_2,(gui_helpers.BARS_X + 2*OFFSET+20, gui_helpers.IS_CIVILIZATIONS_BUTTON_Y+15))
+    
+    window_surface.blit(is_borders_text,(gui_helpers.BARS_X, gui_helpers.IS_BORDERS_BUTTON_Y-30))
+    window_surface.blit(is_borders_text_2,(gui_helpers.BARS_X + 2*OFFSET+20, gui_helpers.IS_BORDERS_BUTTON_Y+15))
 
     window_surface.blit(scale_text,(gui_helpers.BARS_X, gui_helpers.SCALE_BUTTON_Y-30))
     window_surface.blit(selected_scale_outline,(gui_helpers.scale_outline[0]-2, gui_helpers.scale_outline[1]+8))

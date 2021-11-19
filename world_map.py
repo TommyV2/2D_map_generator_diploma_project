@@ -7,7 +7,8 @@ from PIL import Image, ImageDraw
 import math
 import numpy as np
 import colors
-import test
+import borders_helper
+import random
 
 
 class WorldMap:
@@ -22,6 +23,7 @@ class WorldMap:
         self.scale = data.scale
         self.is_rivers = data.is_rivers
         self.civilisations = data.civilisations
+        self.borders = data.borders
         self.water_level = data.water_level
         self.temperature_factor = data.temperature_factor
         self.mountains_factor = data.mountains_factor
@@ -29,15 +31,17 @@ class WorldMap:
         self.islands_number =  data.islands_number
         self.heights = data.heights
         self.river_starting_points = None
+        self.road_starting_points = None
         self.countries =  None
         self.rivers = None
+        self.roads = None
         self.extra_rivers = None
         self.country_regions_list = None
         self.red_rivers = []        
         self.civs = data.civs
         self.civ_indexes = None
         self.cities = None
-        # test2.prepare()
+        self.roads = None
 
     def generate(self):
         self.backup_islands_map = np.copy(self.elevation_map)
@@ -59,6 +63,10 @@ class WorldMap:
             #self.countries = self.create_countries(self.heights, 2)
             self.create_countries_map(self.civs)
             self.generate_cities(self.civs)
+            self.generate_road_list()
+            # self.generate_road_starting_points(self.elevation_map, self.water_level)
+            # self.generate_roads()
+            ##self.make_rivers_deep(self.rivers, self.elevation_map, 3)
             # self.determine_country_indexes(self.civs, self.heights)
             # print(self.civ_indexes)         
         #self.make_rivers_deep(self.extra_rivers, self.elevation_map, 1)
@@ -72,8 +80,43 @@ class WorldMap:
         # heig = self.heights[:l]
         self.create_countries_map(self.civs)
         self.generate_cities(self.civs)
+        self.generate_road_list()
         # self.determine_country_indexes(self.civs, self.heights)
         # print(self.civ_indexes)
+
+    def generate_road_list(self):
+        roads = []
+        flat_list = [item for sublist in self.cities for item in sublist]
+        for city in flat_list:
+            #n = random.randint(2,4)
+            n = 2
+            closest_cities = self.get_closest_cities(city,flat_list,n)
+            closest_cities = closest_cities[1:]
+            for cc in closest_cities:
+                duplicate = False
+                x1 = city[1]
+                x2 = cc[1]
+                y1 = city[0]
+                y2 = cc[0]
+                if city[0]<cc[0]:
+                    #road = [city,cc]
+                    road = [(x1,y1),(x2,y2)]
+                else:
+                    #road = [cc, city]
+                    road = [(x1,y1),(x2,y2)]
+                for r in roads:
+                    if r == road:
+                        duplicate = True
+                        break        
+                if duplicate == False:
+                    roads.append(road) 
+        print("Finished generating roads list")
+        print(roads)
+        self.roads = roads   
+
+    def get_closest_cities(self, city, cities,n):
+        cities_by_distance = sorted(cities, key=lambda x: math.sqrt((city[0] - x[0])**2+(city[1] - x[1])**2), reverse=False)
+        return cities_by_distance[:n]  
 
     def cancel_islands(self):
         self.elevation_map = np.copy(self.backup_islands_map)
@@ -93,19 +136,25 @@ class WorldMap:
     def cancel_rivers(self):
         self.elevation_map = np.copy(self.backup_rivers_map)
 
+    def get_country_index(self, x,y):
+        country_region = int(self.countries_map[x][y])
+        idx = [i for i,item in enumerate(self.country_regions_list) if country_region in item]
+        country_index = idx[0]
+        return country_index
+
     def draw_map(self):
         img = Image.new( 'RGB', self.size, "black")
         pixels = img.load()
         draw = ImageDraw.Draw(img)
         print(self.civilisations)
-        if self.civilisations:
+        if self.borders and self.country_regions_list != None:
             for y in range(self.size[1]):
                 for x in range(self.size[0]):
                     #country_index = int(self.countries_map[y][x])
-                    country_region = int(self.countries_map[y][x])
-                    idx = [i for i,item in enumerate(self.country_regions_list) if country_region in item]
-                    country_index = idx[0]
-
+                    # country_region = int(self.countries_map[y][x])
+                    # idx = [i for i,item in enumerate(self.country_regions_list) if country_region in item]
+                    # country_index = idx[0]
+                    country_index = self.get_country_index(y,x)
                     country_color = colors.country_colors[country_index]
                     e = self.elevation_map[y][x]
                     m = self.temperature_map[y][x]
@@ -140,7 +189,12 @@ class WorldMap:
         #self.draw_cities(self.cities, draw)
         #img.show()
         #img = img.save("generated_maps_22_10/"+str(self.elevation_map[0][0])+".jpg", format='JPEG', subsampling=0, quality=100 ) 
-        self.draw_cities(self.cities, img)
+        # if self.roads != []:
+        #     for road in self.roads:
+        #         draw.line(road, fill=(26, 13, 0), width=2)
+        if self.civilisations and self.cities != None:
+            self.draw_roads(self.roads, draw)
+            self.draw_cities(self.cities, img)   
         img = img.save("image.jpg", format='JPEG', subsampling=0, quality=100 )        
         print("Finished drawing map")
         return 1
@@ -151,10 +205,15 @@ class WorldMap:
                 capital, normal = colors.city_colors[i]             
                 for j,city in enumerate(self.cities[i]): 
                     if j == 0:  
-                        img.paste(capital,(city[1],city[0]),capital)                      
+                        img.paste(capital,(city[1]-10,city[0]-10),capital)                      
                     else:   
-                        img.paste(normal,(city[1],city[0]),normal) 
-        print("Finished drawing cities")        
+                        img.paste(normal,(city[1]-7,city[0]-7),normal) 
+        print("Finished drawing cities")
+
+    def draw_roads(self, roads, draw):
+        for road in roads:
+            draw.line(road, fill=(26, 13, 0), width=2)
+        print("Finished drawing roads")
 
     def modify_elevation_map_with_islands(self):
         for y in range(self.size[1]):   
@@ -210,13 +269,13 @@ class WorldMap:
         return countries.index(country)
 
     def create_countries_map(self, civs):
-        test.calculate_country_borders(civs)
+        borders_helper.calculate_country_borders(civs)
         # for y in range(self.size[1]):   
         #     for x in range(self.size[0]):
         #         country_index =  self.countries_function(y, x, heights, countries)
         #         self.countries_map[y][x] = country_index
-        self.countries_map = test.world
-        self.country_regions_list = test.country_regions_list
+        self.countries_map = borders_helper.world
+        self.country_regions_list = borders_helper.country_regions_list
         print("Finished creating countries map")
 
     def countries_function(self, x, y, heights, countries): # [(1,1),(2,2)(3,3)] [(1,2)]
@@ -236,18 +295,26 @@ class WorldMap:
         return country_index   
 
     def generate_cities(self, civs):
-        cities = [None] * len(civs)  
+        cities = [None] * len(civs)
+        n = randrange(8,20)
+        elevation = self.elevation_map
+        water_level = self.water_level + self.sea_level_factor
         for i,civ in enumerate(civs):
             country = []
             dx = randrange(10,30)
             dy = randrange(10,30)
-            capital = (civ[0]+dx, civ[1]+dy)
-            dx2 = randrange(50,100)
-            dy2 = randrange(50,100)
-            normal = (civ[0]+dx2, civ[1]+dy2)
-            country.append(capital)
-            country.append(normal)
+            capital = (civ[0]+dx, civ[1]+dy)           
+            country.append(capital)           
             cities[i] = country
+        while n:
+            x = randrange(50,750)
+            y = randrange(50,750)
+            if elevation[x][y] > water_level:
+                if elevation[x][y] < (water_level+1.6-self.mountains_factor):
+                    idx = self.get_country_index(x,y)
+                    city = (x,y)
+                    cities[idx].append(city) 
+                    n -= 1     
         self.cities = cities    
 
     def determine_country_indexes(self, civs, heights):
@@ -323,6 +390,37 @@ class WorldMap:
                 starting_points.append(point)
                 i+=1
         self.river_starting_points = starting_points
+
+    def generate_road_starting_points(self, elevation_map, water_level):
+        road_number = randrange(5,15)
+        i=0 
+        starting_points = []
+        tries = 0
+        print("Generating "+str(road_number)+" roads")  
+        while i < road_number:
+            x = randrange(10,self.size[0]-10)
+            y = randrange(10,self.size[1]-10)
+            if elevation_map[y][x] > water_level: #water_level+0.7               
+                point= (y,x)
+                starting_points.append(point)
+                i+=1
+        self.road_starting_points = starting_points
+
+    def generate_roads(self):   
+        water_level = self.water_level + self.sea_level_factor
+        elevation_map = self.elevation_map
+        starting_points = self.road_starting_points
+        print("Roads:")   
+        print(starting_points)
+        roads = []
+        for point in starting_points:                
+            road = self.generate_road(roads, point, elevation_map, water_level)
+            if road == None:
+                continue
+            roads.append(road)
+
+        self.roads = roads
+        print("Finished generating rivers")
 
     def generate_rivers(self, size, water_level, sea_level_factor):
         water_level = water_level + sea_level_factor
@@ -467,7 +565,78 @@ class WorldMap:
                     
             #if (current_height < water_level and is_big_enought(elevation_map, angles2, p)) or end == True:
             #    break
-        return river 
+        return river
+
+    def generate_road(self, roads, starting_point, elevation_map, water_level):
+        size = self.size
+        angles = np.arange(0.0, 180, 10)
+        line_len = 3
+        road = [] 
+        
+        current_x = int(starting_point[0])
+        current_y = int(starting_point[1])       
+        current_height = elevation_map[current_x ][current_y] 
+        p = (current_x, current_y)
+        road.append(p)
+        segments = 0
+        while True:
+            start_angle = 0
+            steepness = 10000
+            tmp_x = 0
+            tmp_y = 0
+            tmp_height = 0
+            tmp_list = []
+            max_steepness = 0
+            i = 0
+            loop = True
+            end = False
+            outside = False
+            while loop:
+                for angle in angles:             
+                    x = current_x + math.cos(angle)*(line_len+i*2)
+                    y = current_y + math.sin(angle)*(line_len+i*2)    
+                    if x >= size[0] or y >= size[1] or x <= 0 or y <= 0:
+                        return None                        
+                    height = elevation_map[int(x)][int(y)]
+                    new_steepness = abs(height - current_height)
+                    # if is_extra_river:
+                    #     new_steepness = current_height - height
+                    # else:
+                    #     new_steepness = height - current_height
+                    tmp_list.append(new_steepness)
+                    if new_steepness < steepness:
+                        tmp_x = x
+                        loop = False
+                        tmp_y = y
+                        tmp_height = height
+                        steepness = new_steepness
+                    
+                i=i+1
+            current_height = tmp_height       
+            current_x = tmp_x
+            current_y = tmp_y
+            p = (current_x, current_y)
+            # if is_extra_river == True:
+            #     if self.is_inside_river(rivers, p, 2) == True:
+            #         break
+            #rivers fix  
+            road.append(p)
+            if len(road)>1:
+                previous = road[-2]
+                d = math.sqrt( ((p[0]-previous[0])**2)+((p[1]-previous[1])**2))
+                if d > 30:
+                    new = self.get_smaller_river_chunks(previous, p)
+                    road.pop()
+                    road.extend(new)
+            segments +=1
+            # if (is_extra_river and segments >= 14):
+            #     end = True  
+            if end == True:
+                break
+            if segments > 50:
+                break
+           
+        return road 
 
     def create_lake(self, p):
         for y in range(self.size[1]):   
