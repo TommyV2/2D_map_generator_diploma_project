@@ -64,8 +64,9 @@ class WorldMap:
             self.create_countries_map(self.civs)
             self.generate_cities(self.civs)
             self.generate_road_list()
+            self.generate_roads(self.roads)
             # self.generate_road_starting_points(self.elevation_map, self.water_level)
-            # self.generate_roads()
+            
             ##self.make_rivers_deep(self.rivers, self.elevation_map, 3)
             # self.determine_country_indexes(self.civs, self.heights)
             # print(self.civ_indexes)         
@@ -81,38 +82,10 @@ class WorldMap:
         self.create_countries_map(self.civs)
         self.generate_cities(self.civs)
         self.generate_road_list()
+        self.generate_roads(self.roads)
         # self.determine_country_indexes(self.civs, self.heights)
         # print(self.civ_indexes)
 
-    def generate_road_list(self):
-        roads = []
-        flat_list = [item for sublist in self.cities for item in sublist]
-        for city in flat_list:
-            #n = random.randint(2,4)
-            n = 2
-            closest_cities = self.get_closest_cities(city,flat_list,n)
-            closest_cities = closest_cities[1:]
-            for cc in closest_cities:
-                duplicate = False
-                x1 = city[1]
-                x2 = cc[1]
-                y1 = city[0]
-                y2 = cc[0]
-                if city[0]<cc[0]:
-                    #road = [city,cc]
-                    road = [(x1,y1),(x2,y2)]
-                else:
-                    #road = [cc, city]
-                    road = [(x1,y1),(x2,y2)]
-                for r in roads:
-                    if r == road:
-                        duplicate = True
-                        break        
-                if duplicate == False:
-                    roads.append(road) 
-        print("Finished generating roads list")
-        print(roads)
-        self.roads = roads   
 
     def get_closest_cities(self, city, cities,n):
         cities_by_distance = sorted(cities, key=lambda x: math.sqrt((city[0] - x[0])**2+(city[1] - x[1])**2), reverse=False)
@@ -211,8 +184,9 @@ class WorldMap:
         print("Finished drawing cities")
 
     def draw_roads(self, roads, draw):
+        #draw.line(roads, fill=(26, 13, 0), width=2)
         for road in roads:
-            draw.line(road, fill=(26, 13, 0), width=2)
+            draw.line(road, fill=(61, 61, 41), width=2)
         print("Finished drawing roads")
 
     def modify_elevation_map_with_islands(self):
@@ -301,10 +275,18 @@ class WorldMap:
         water_level = self.water_level + self.sea_level_factor
         for i,civ in enumerate(civs):
             country = []
-            dx = randrange(10,30)
-            dy = randrange(10,30)
-            capital = (civ[0]+dx, civ[1]+dy)           
-            country.append(capital)           
+            loop = True
+            while loop:
+                dx = randrange(-80,80)
+                dy = randrange(-80,80)
+                x = civ[0]+dx
+                y = civ[1]+dy
+                if x > 0 and x < 800 and y > 0 and y < 800:
+                    if elevation[x][y] > water_level:
+                        if elevation[x][y] < (water_level+1.6-self.mountains_factor):
+                            capital = (x, y)           
+                            country.append(capital)
+                            loop = False           
             cities[i] = country
         while n:
             x = randrange(50,750)
@@ -391,36 +373,118 @@ class WorldMap:
                 i+=1
         self.river_starting_points = starting_points
 
-    def generate_road_starting_points(self, elevation_map, water_level):
-        road_number = randrange(5,15)
-        i=0 
-        starting_points = []
-        tries = 0
-        print("Generating "+str(road_number)+" roads")  
-        while i < road_number:
-            x = randrange(10,self.size[0]-10)
-            y = randrange(10,self.size[1]-10)
-            if elevation_map[y][x] > water_level: #water_level+0.7               
-                point= (y,x)
-                starting_points.append(point)
-                i+=1
-        self.road_starting_points = starting_points
+    def generate_road_list(self):
+        roads = []
+        flat_list = [item for sublist in self.cities for item in sublist]
+        for city in flat_list:
+            #n = random.randint(2,4)
+            n = 2
+            closest_cities = self.get_closest_cities(city,flat_list,n)
+            closest_cities = closest_cities[1:]
+            for cc in closest_cities:
+                duplicate = False
+                x1 = city[1]
+                x2 = cc[1]
+                y1 = city[0]
+                y2 = cc[0]
+                if city[0]<cc[0]:
+                    #road = [city,cc]
+                    road = [(x1,y1),(x2,y2)]
+                else:
+                    #road = [cc, city]
+                    road = [(x2,y2), (x1,y1)]
+                for r in roads:
+                    if r == road:
+                        duplicate = True
+                        break        
+                if duplicate == False:
+                    roads.append(road) 
+        print("Finished generating roads list")
+        self.roads = roads 
+        print(roads)  
 
-    def generate_roads(self):   
+    def generate_roads(self, roads):   
         water_level = self.water_level + self.sea_level_factor
         elevation_map = self.elevation_map
-        starting_points = self.road_starting_points
-        print("Roads:")   
-        print(starting_points)
-        roads = []
-        for point in starting_points:                
-            road = self.generate_road(roads, point, elevation_map, water_level)
+        roads_generated = []
+        for road in roads:              
+            new_road = self.generate_road(road, elevation_map, water_level)
             if road == None:
                 continue
-            roads.append(road)
+            roads_generated.append(new_road)
+        self.roads = roads_generated
+        print("Finished generating roads")
+    
+    def get_basic_angle(self,p1,p2):
+        x1, y1 = p1
+        x2, y2 = p2
+        basic_angle = math.asin(abs(y2-y1)-math.sqrt((y2-y1)**2+(x2-x1)**2))
 
-        self.roads = roads
-        print("Finished generating rivers")
+    def generate_road(self, road, elevation_map, water_level):
+        size = self.size
+        angles = np.arange(0.0, 360, 10)
+        line_len = 10
+        new_road = [] 
+        current_x = int(road[0][0])
+        current_y = int(road[0][1])
+        destination_x = int(road[1][0])
+        destination_y = int(road[1][1])  
+        previous_distance = math.sqrt((destination_y-current_y)**2+(destination_x-current_x)**2)     
+        current_height = elevation_map[current_x ][current_y] 
+        p = (current_x, current_y)
+        new_road.append(p)
+        segments = 0
+        dist_change = (line_len)*math.sqrt(3)/2
+        while True:
+            start_angle = 0
+            min_steepness = 10000
+            tmp_x = 0
+            tmp_y = 0
+            tmp_height = 0
+            tmp_list = []
+            max_steepness = 0
+            i = 0
+            loop = True
+            end = False
+            distance_ending = math.sqrt((destination_y-current_y)**2+(destination_x-current_x)**2)           
+            if distance_ending < 8:
+               new_road.append((destination_x, destination_y))
+               break 
+            
+            for angle in angles:             
+                x = current_x + math.cos(angle)*line_len
+                y = current_y + math.sin(angle)*line_len  
+                distance = math.sqrt((destination_y-y)**2+(destination_x-x)**2) 
+                if x >= size[0] or y >= size[1] or x <= 0 or y <= 0:
+                    continue                        
+                height = elevation_map[int(x)][int(y)]            
+                new_steepness = abs(height - current_height)
+                if previous_distance-distance > 3: #dist_change:
+                    #if height < (water_level+1.6-self.mountains_factor):
+                    if new_steepness < min_steepness:
+                        tmp_x = x
+                        tmp_y = y
+                        tmp_height = height
+                        min_steepness = new_steepness
+                    
+            
+            current_height = tmp_height       
+            current_x = tmp_x
+            current_y = tmp_y
+            previous_distance = math.sqrt((destination_y-current_y)**2+(destination_x-current_x)**2)
+            p = (current_x, current_y) 
+            new_road.append(p)
+            # if len(road)>1:
+            #     previous = road[-2]
+            #     d = math.sqrt( ((p[0]-previous[0])**2)+((p[1]-previous[1])**2))
+            #     if d > 30:
+            #         new = self.get_smaller_river_chunks(previous, p)
+            #         road.pop()
+            #         road.extend(new)
+            segments +=1
+            # if (is_extra_river and segments >= 14):
+            #     end = True             
+        return new_road
 
     def generate_rivers(self, size, water_level, sea_level_factor):
         water_level = water_level + sea_level_factor
@@ -565,78 +629,7 @@ class WorldMap:
                     
             #if (current_height < water_level and is_big_enought(elevation_map, angles2, p)) or end == True:
             #    break
-        return river
-
-    def generate_road(self, roads, starting_point, elevation_map, water_level):
-        size = self.size
-        angles = np.arange(0.0, 180, 10)
-        line_len = 3
-        road = [] 
-        
-        current_x = int(starting_point[0])
-        current_y = int(starting_point[1])       
-        current_height = elevation_map[current_x ][current_y] 
-        p = (current_x, current_y)
-        road.append(p)
-        segments = 0
-        while True:
-            start_angle = 0
-            steepness = 10000
-            tmp_x = 0
-            tmp_y = 0
-            tmp_height = 0
-            tmp_list = []
-            max_steepness = 0
-            i = 0
-            loop = True
-            end = False
-            outside = False
-            while loop:
-                for angle in angles:             
-                    x = current_x + math.cos(angle)*(line_len+i*2)
-                    y = current_y + math.sin(angle)*(line_len+i*2)    
-                    if x >= size[0] or y >= size[1] or x <= 0 or y <= 0:
-                        return None                        
-                    height = elevation_map[int(x)][int(y)]
-                    new_steepness = abs(height - current_height)
-                    # if is_extra_river:
-                    #     new_steepness = current_height - height
-                    # else:
-                    #     new_steepness = height - current_height
-                    tmp_list.append(new_steepness)
-                    if new_steepness < steepness:
-                        tmp_x = x
-                        loop = False
-                        tmp_y = y
-                        tmp_height = height
-                        steepness = new_steepness
-                    
-                i=i+1
-            current_height = tmp_height       
-            current_x = tmp_x
-            current_y = tmp_y
-            p = (current_x, current_y)
-            # if is_extra_river == True:
-            #     if self.is_inside_river(rivers, p, 2) == True:
-            #         break
-            #rivers fix  
-            road.append(p)
-            if len(road)>1:
-                previous = road[-2]
-                d = math.sqrt( ((p[0]-previous[0])**2)+((p[1]-previous[1])**2))
-                if d > 30:
-                    new = self.get_smaller_river_chunks(previous, p)
-                    road.pop()
-                    road.extend(new)
-            segments +=1
-            # if (is_extra_river and segments >= 14):
-            #     end = True  
-            if end == True:
-                break
-            if segments > 50:
-                break
-           
-        return road 
+        return river 
 
     def create_lake(self, p):
         for y in range(self.size[1]):   
