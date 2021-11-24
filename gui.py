@@ -22,7 +22,7 @@ def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_
     is_rivers = is_rivers
     civilisations = is_civilizations
     water_level = 0.3
-    temperature_factor = temperature_factor #-0.6 |snieg| -0.1 |trawa| 0.7 piach
+    temperature_factor = uniform(-0.6,0.7) #temperature_factor #-0.6 |snieg| -0.1 |trawa| 0.7 piach
     mountains_factor = mountains_factor
     sea_level_factor = sea_level_factor
     islands_number = randrange(1,10)
@@ -34,7 +34,7 @@ def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_
             y = randrange(0+height/10,height-height/10)  
             h = (x,y)
             heights.append(h)
-
+        gui_helpers.selected_civs = heights
     civs = civs
     if civs == None or civs == []:
         n = random.randint(2,MAX_CIVS)

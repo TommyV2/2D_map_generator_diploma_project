@@ -108,7 +108,7 @@ def re_draw(new_temperature, new_mountains, new_sea_level, is_rivers, selected_h
         if add_rivers:
             world_map.add_rivers()
             add_rivers = False
-
+    # world_map.redraw_civilizations()
     world_map.draw_map()
     finished = True
 

@@ -42,6 +42,7 @@ class WorldMap:
         self.civ_indexes = None
         self.cities = None
         self.roads = None
+        self.capitals_indexes = []
 
     def generate(self):
         self.backup_islands_map = np.copy(self.elevation_map)
@@ -51,6 +52,12 @@ class WorldMap:
         print(self.heights)      
         self.modify_elevation_map_with_islands()          
         self.backup_rivers_map = np.copy(self.elevation_map)
+        if self.civilisations:
+            #self.countries = self.create_countries(self.heights, 2)
+            self.create_countries_map(self.civs)
+            self.generate_cities(self.civs)
+            self.generate_road_list()
+            self.generate_roads(self.roads)
         if self.is_rivers:
             #self.generate_rivers(self.size, self.elevation_map, self.water_level)
             self.generate_river_starting_points(self.elevation_map, self.water_level)
@@ -59,12 +66,7 @@ class WorldMap:
             #self.make_rivers_deep(self.extra_rivers, self.elevation_map, 2)
             self.thermal_erosion(self.size, self.elevation_map)
         #self.countries = self.heights[0:2]
-        if self.civilisations:
-            #self.countries = self.create_countries(self.heights, 2)
-            self.create_countries_map(self.civs)
-            self.generate_cities(self.civs)
-            self.generate_road_list()
-            self.generate_roads(self.roads)
+        
             # self.generate_road_starting_points(self.elevation_map, self.water_level)
             
             ##self.make_rivers_deep(self.rivers, self.elevation_map, 3)
@@ -186,7 +188,7 @@ class WorldMap:
     def draw_roads(self, roads, draw):
         #draw.line(roads, fill=(26, 13, 0), width=2)
         for road in roads:
-            draw.line(road, fill=(61, 61, 41), width=2)
+            draw.line(road, fill=(61, 61, 41), width=1)
         print("Finished drawing roads")
 
     def modify_elevation_map_with_islands(self):
@@ -375,10 +377,22 @@ class WorldMap:
 
     def generate_road_list(self):
         roads = []
-        flat_list = [item for sublist in self.cities for item in sublist]
-        for city in flat_list:
+        
+        #flat_list = [item for sublist in self.cities for item in sublist]
+        flat_list = [] # capital roads fix
+        x = 0
+        for sublist in self.cities:
+            for i,item in enumerate(sublist):
+                flat_list.append(item)
+                if i == 0:
+                    self.capitals_indexes.append(x)
+                x+=1
+
+        for i,city in enumerate(flat_list):
             #n = random.randint(2,4)
             n = 2
+            if i in self.capitals_indexes: # # capital roads fix
+                n=3 # # capital roads fix
             closest_cities = self.get_closest_cities(city,flat_list,n)
             closest_cities = closest_cities[1:]
             for cc in closest_cities:
@@ -422,8 +436,8 @@ class WorldMap:
 
     def generate_road(self, road, elevation_map, water_level):
         size = self.size
-        angles = np.arange(0.0, 360, 10)
-        line_len = 10
+        angles = np.arange(0.0, 360, 1)
+        line_len = 3
         new_road = [] 
         current_x = int(road[0][0])
         current_y = int(road[0][1])
@@ -438,9 +452,11 @@ class WorldMap:
         while True:
             start_angle = 0
             min_steepness = 10000
+            min_angle_diff = 360
             tmp_x = 0
             tmp_y = 0
             tmp_height = 0
+            tmp_angle = 0
             tmp_list = []
             max_steepness = 0
             i = 0
@@ -459,20 +475,25 @@ class WorldMap:
                     continue                        
                 height = elevation_map[int(x)][int(y)]            
                 new_steepness = abs(height - current_height)
-                if previous_distance-distance > 3: #dist_change:
-                    #if height < (water_level+1.6-self.mountains_factor):
-                    if new_steepness < min_steepness:
+                #angle_diff = abs(angle-tmp_angle) # road fix 1
+                if previous_distance-distance > 0.05: #dist_change:
+                    #if height < (water_level+1-self.mountains_factor):
+                    if new_steepness < min_steepness: # road fix 1
                         tmp_x = x
                         tmp_y = y
+                        tmp_angle = angle
                         tmp_height = height
                         min_steepness = new_steepness
+                        #min_angle_diff = angle_diff # road fix 1
                     
             
             current_height = tmp_height       
             current_x = tmp_x
             current_y = tmp_y
             previous_distance = math.sqrt((destination_y-current_y)**2+(destination_x-current_x)**2)
-            p = (current_x, current_y) 
+            p = (current_x, current_y)
+            if elevation_map[int(current_y)][int(current_x)] < water_level:
+                return new_road
             new_road.append(p)
             # if len(road)>1:
             #     previous = road[-2]
