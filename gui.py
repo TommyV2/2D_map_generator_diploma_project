@@ -25,7 +25,7 @@ def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_
     temperature_factor = uniform(-0.6,0.7) #temperature_factor #-0.6 |snieg| -0.1 |trawa| 0.7 piach
     mountains_factor = mountains_factor
     sea_level_factor = sea_level_factor
-    islands_number = randrange(1,10)
+    islands_number = randrange(3,10)
     heights = selected_heights
     borders = is_borders
     if heights == None or heights == []:
@@ -38,7 +38,7 @@ def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_
     civs = civs
     if civs == None or civs == []:
         n = random.randint(2,MAX_CIVS)
-        n=2
+        n=3
         civs = heights[:n]
 
     elif len(civs) > MAX_CIVS:
@@ -171,7 +171,7 @@ redraw_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((width-32
 
 ##### GENERATION PARAMETERS ####################################################
 size = (800, 800)
-elevation_seed_index = 1 #randrange(1,2)
+elevation_seed_index = 2 #randrange(1,2)
 temperature_seed_index = 1 #randrange(1,10)
 elevation_seed = np.loadtxt("elevation_seeds/seed"+str(elevation_seed_index)+".txt")
 temperature_seed = np.loadtxt("temperature_seeds/seed"+str(temperature_seed_index)+".txt")
@@ -202,6 +202,13 @@ while is_running:
             if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == generate_button: 
                     elevation_seed = np.loadtxt("elevation_seeds/seed"+str(elevation_seed_index)+".txt")
+                    
+                    # main.heights = [] 
+                    # gui_helpers.selected_heights = [] 
+                    # gui_helpers.selected_civs = []               
+                    # selected_heights = []
+                    # civs = []
+
                     start_data_object = init_data_object(temperature_factor, elevation_seed, mountains_factor, sea_level_factor, is_rivers, selected_heights, selected_scale, is_civilizations,civs, is_borders,  )
                     status_text = myfont.render("Loading...", False, (0, 0, 0))
                     thread = Thread(target = main.main, args=(start_data_object,))                  

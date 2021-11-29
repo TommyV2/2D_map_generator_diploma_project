@@ -279,13 +279,13 @@ class WorldMap:
             country = []
             loop = True
             while loop:
-                dx = randrange(-80,80)
-                dy = randrange(-80,80)
+                dx = randrange(-100,100)
+                dy = randrange(-100,100)
                 x = civ[0]+dx
                 y = civ[1]+dy
                 if x > 0 and x < 800 and y > 0 and y < 800:
                     if elevation[x][y] > water_level:
-                        if elevation[x][y] < (water_level+1.6-self.mountains_factor):
+                        if elevation[x][y] < (water_level+1.7-self.mountains_factor):
                             capital = (x, y)           
                             country.append(capital)
                             loop = False           
@@ -299,7 +299,8 @@ class WorldMap:
                     city = (x,y)
                     cities[idx].append(city) 
                     n -= 1     
-        self.cities = cities    
+        self.cities = cities
+        print("Finished generating cities")    
 
     def determine_country_indexes(self, civs, heights):
         n = len(civs)
@@ -437,7 +438,7 @@ class WorldMap:
     def generate_road(self, road, elevation_map, water_level):
         size = self.size
         angles = np.arange(0.0, 360, 1)
-        line_len = 3
+        line_len = 10
         new_road = [] 
         current_x = int(road[0][0])
         current_y = int(road[0][1])
@@ -449,25 +450,31 @@ class WorldMap:
         new_road.append(p)
         segments = 0
         dist_change = (line_len)*math.sqrt(3)/2
+        tmp_x_backup = -1
+        tmp_y_backup = -1
         while True:
             start_angle = 0
             min_steepness = 10000
             min_angle_diff = 360
-            tmp_x = 0
-            tmp_y = 0
+            tmp_x = -1
+            tmp_y = -1
             tmp_height = 0
             tmp_angle = 0
             tmp_list = []
             max_steepness = 0
+            min_dist = 1000
             i = 0
             loop = True
             end = False
             distance_ending = math.sqrt((destination_y-current_y)**2+(destination_x-current_x)**2)           
-            if distance_ending < 8:
-               new_road.append((destination_x, destination_y))
-               break 
+            if distance_ending < 20:
+                p = (destination_x, destination_y)
+                new = self.get_smaller_river_chunks(new_road[-1], p)
+                new_road.extend(new)
+                #new_road.append((destination_x, destination_y))
+                break 
             
-            for angle in angles:             
+            for angle in angles:                            
                 x = current_x + math.cos(angle)*line_len
                 y = current_y + math.sin(angle)*line_len  
                 distance = math.sqrt((destination_y-y)**2+(destination_x-x)**2) 
@@ -475,26 +482,51 @@ class WorldMap:
                     continue                        
                 height = elevation_map[int(x)][int(y)]            
                 new_steepness = abs(height - current_height)
-                #angle_diff = abs(angle-tmp_angle) # road fix 1
-                if previous_distance-distance > 0.05: #dist_change:
+                angle_diff = abs(angle-tmp_angle) # road fix 1
+                if previous_distance-distance > 1: #dist_change:
+                    if distance < min_dist:
+                        min_dist = distance
+                        tmp_x_backup = x
+                        tmp_y_backup = y
                     #if height < (water_level+1-self.mountains_factor):
-                    if new_steepness < min_steepness: # road fix 1
+                    if new_steepness < min_steepness-0.08 and height<self.water_level+2-self.mountains_factor: # road fix 1 # 0.2, 0,1 mozna zmieniac
                         tmp_x = x
                         tmp_y = y
                         tmp_angle = angle
                         tmp_height = height
                         min_steepness = new_steepness
                         #min_angle_diff = angle_diff # road fix 1
-                    
-            
+
+                # if previous_distance-distance > 0.05:
+                #     if distance < min_dist:
+                #         min_dist = distance
+                #         tmp_x_backup = x
+                #         tmp_y_backup = y
+                #         if height>water_level+0.1 and height<water_level+1: #dist_change:
+                #             if new_steepness < min_steepness-0.03:                
+                #                 tmp_x = x
+                #                 tmp_y = y
+                #                 tmp_angle = angle
+                #                 tmp_height = height
+                #                 min_steepness = new_steepness
+                    #min_angle_diff = angle_diff # road fix 1
+                if angle == 360 and tmp_x == -1:
+                    tmp_x = tmp_x_backup   
+                    tmp_y = tmp_y_backup
             current_height = tmp_height       
             current_x = tmp_x
             current_y = tmp_y
             previous_distance = math.sqrt((destination_y-current_y)**2+(destination_x-current_x)**2)
             p = (current_x, current_y)
             if elevation_map[int(current_y)][int(current_x)] < water_level:
+                start = (destination_x, destination_y)
+                end = (destination_x+1, destination_y+1)
+                new_road = [start, end]
                 return new_road
-            new_road.append(p)
+            p = (destination_x, destination_y)
+            new = self.get_smaller_river_chunks(new_road[-1], p)
+            new_road.extend(new)
+            # new_road.append(p)
             # if len(road)>1:
             #     previous = road[-2]
             #     d = math.sqrt( ((p[0]-previous[0])**2)+((p[1]-previous[1])**2))
@@ -711,9 +743,9 @@ class WorldMap:
         return False
 
     def get_smaller_river_chunks(self, start, end): # zamiast end mamy liste punktów
-        lineLen = 5            
-        maxAngle = math.radians(90)        
-        minDistToEnd = 8 
+        lineLen = 4            
+        maxAngle = math.radians(60)        
+        minDistToEnd = 5 
         current = start
         new_points = []
         while True:

@@ -6,11 +6,11 @@ def noise(nx, ny):
     # Rescale from -1.0:+1.0 to 0.0:1.0
     return gen.noise2d(nx, ny) / 2.0 + 0.5
 
-size = 1200
+size = 800
 start = time.time()
-for seed in range(12,13):
+for seed in range(2,10):
     map = []
-    filename = 'elevation_seeds_1000/seed'+str(seed)+'.txt'
+    filename = 'elevation_seeds/seed'+str(seed)+'.txt'
     gen = OpenSimplex(seed)
     for y in range(size):
         map.append([0] * size)
