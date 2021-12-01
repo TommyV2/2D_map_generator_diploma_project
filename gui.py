@@ -28,14 +28,16 @@ def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_
     islands_number = randrange(3,10)
     heights = selected_heights
     borders = is_borders
-    if heights == None or heights == []:
-        for i in range(islands_number):
-            x = randrange(0+width/10,width-width/10) 
-            y = randrange(0+height/10,height-height/10)  
-            h = (x,y)
-            heights.append(h)
-        gui_helpers.selected_civs = heights
+    # if heights == None or heights == []:
+    heights = []
+    for i in range(islands_number):
+        x = randrange(80,720) 
+        y = randrange(80,720)  
+        h = (x,y)
+        heights.append(h)
+    gui_helpers.selected_civs = heights
     civs = civs
+    civs = []
     if civs == None or civs == []:
         n = random.randint(2,MAX_CIVS)
         n=3
@@ -202,13 +204,13 @@ while is_running:
             if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == generate_button: 
                     elevation_seed = np.loadtxt("elevation_seeds/seed"+str(elevation_seed_index)+".txt")
-                    
+                    # prepare_voronoi.prepare()
                     # main.heights = [] 
                     # gui_helpers.selected_heights = [] 
                     # gui_helpers.selected_civs = []               
                     # selected_heights = []
                     # civs = []
-
+                    # gui_helpers.selected_civs_initialized = False
                     start_data_object = init_data_object(temperature_factor, elevation_seed, mountains_factor, sea_level_factor, is_rivers, selected_heights, selected_scale, is_civilizations,civs, is_borders,  )
                     status_text = myfont.render("Loading...", False, (0, 0, 0))
                     thread = Thread(target = main.main, args=(start_data_object,))                  

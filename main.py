@@ -81,6 +81,8 @@ def re_draw(new_temperature, new_mountains, new_sea_level, is_rivers, selected_h
     world_map.civilisations = is_civilizations
     world_map.borders = is_borders
     ##
+
+    
     if is_civilizations and world_map.cities == None:
         world_map.redraw_civilizations()
 

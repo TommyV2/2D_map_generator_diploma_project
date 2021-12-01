@@ -201,3 +201,4 @@ green_capital = Image.open("gui_visuals/green_capital.png", 'r')
 green_normal = Image.open("gui_visuals/green_normal.png", 'r')
 
 city_colors = [(red_capital, red_normal), (blue_capital, blue_normal),(pink_capital, pink_normal),(green_capital, green_normal)]
+neutral_city = Image.open("gui_visuals/neutral_city.png", 'r')
