@@ -765,9 +765,9 @@ class WorldMap:
         return False
 
     def get_smaller_river_chunks(self, start, end): # zamiast end mamy liste punktów
-        lineLen = 4            
+        lineLen = 5            
         maxAngle = math.radians(60)        
-        minDistToEnd = 5 
+        minDistToEnd = 6 
         current = start
         new_points = []
         while True:
