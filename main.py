@@ -49,7 +49,8 @@ def main(start_data_object):
 
     print("Temperature: "+str(start_data_object.temperature_factor))
     print("Mountains: "+str(start_data_object.mountains_factor))
-    print("Sea level: "+str(start_data_object.sea_level_factor))       
+    print("Sea level: "+str(start_data_object.sea_level_factor))
+    print("Urbanization level: "+str(start_data_object.urbanization_level_factor))        
     # start_data_object = StartDataObject(size, elevation_seed, temperature_seed, scale, is_rivers, 
     #     civilisations, water_level, temperature_factor, islands_number, heights)
     start = time.time()
@@ -71,7 +72,7 @@ def cancel_rivers():
     world_map.cancel_rivers()
     finished = True
 
-def re_draw(new_temperature, new_mountains, new_sea_level, is_rivers, selected_heights, is_civilizations, is_borders, ):
+def re_draw(new_temperature, new_mountains, new_sea_level, is_rivers, selected_heights, is_civilizations, is_borders, new_urbanization,  ):
     global world_map
     global finished
     global add_rivers
@@ -79,11 +80,14 @@ def re_draw(new_temperature, new_mountains, new_sea_level, is_rivers, selected_h
     world_map.temperature_factor = new_temperature
     world_map.mountains_factor = new_mountains
     world_map.civilisations = is_civilizations
+    redraw_civs = False
+    if world_map.urbanization_level_factor != new_urbanization:
+        redraw_civs = True
+    world_map.urbanization_level_factor = new_urbanization
     world_map.borders = is_borders
-    ##
 
     
-    if is_civilizations and world_map.cities == None:
+    if (is_civilizations and world_map.cities == None) or redraw_civs:
         world_map.redraw_civilizations()
 
     if selected_heights != world_map.heights:

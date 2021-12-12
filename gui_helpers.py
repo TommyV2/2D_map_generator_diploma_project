@@ -8,10 +8,12 @@ OFFSET = 60
 TEMPERATURE_BAR_Y = 100
 MOUNTAINS_BAR_Y = TEMPERATURE_BAR_Y + OFFSET
 SEA_LEVEL_BAR_Y = TEMPERATURE_BAR_Y + 2*OFFSET
-IS_RIVERS_BUTTON_Y = TEMPERATURE_BAR_Y + 3*OFFSET
-IS_CIVILIZATIONS_BUTTON_Y = TEMPERATURE_BAR_Y + 4.5*OFFSET
-IS_BORDERS_BUTTON_Y = TEMPERATURE_BAR_Y + 6*OFFSET
-SCALE_BUTTON_Y = TEMPERATURE_BAR_Y + 7.5*OFFSET
+URBANIZATION_LEVEL_BAR_Y = TEMPERATURE_BAR_Y + 3*OFFSET
+###########
+IS_RIVERS_BUTTON_Y = TEMPERATURE_BAR_Y + 4*OFFSET
+IS_CIVILIZATIONS_BUTTON_Y = TEMPERATURE_BAR_Y + 5.5*OFFSET
+IS_BORDERS_BUTTON_Y = TEMPERATURE_BAR_Y + 7*OFFSET
+SCALE_BUTTON_Y = TEMPERATURE_BAR_Y + 8.5*OFFSET
 
 temperature_pointer_x = BARS_X + BAR_LENGTH/2
 selected_temperature = 0.1
@@ -21,6 +23,9 @@ selected_mountains = 0
 
 sea_level_pointer_x = BARS_X + BAR_LENGTH/2
 selected_sea_level = 0
+
+urbanization_level_pointer_x = BARS_X + BAR_LENGTH/2
+selected_urbanization_level = 0
 
 selected_heights = []
 selected_civs = []
@@ -44,6 +49,9 @@ def handle_bar_clicked(bars, position):
                 break
             elif bar[1] == SEA_LEVEL_BAR_Y:
                 handle_sea_level_bar(position)
+                break
+            elif bar[1] == URBANIZATION_LEVEL_BAR_Y:
+                handle_urbanization_level_bar(position)
                 break
 def handle_map_clicked(map, position):
     bottom_left = (map[0],map[1]+800)
@@ -99,8 +107,6 @@ def handle_mountains_bar(position):
     global selected_mountains
     selected_mountains = mountains_spectrum[0] + percent * range
     mountains_pointer_x = BARS_X + percent * BAR_LENGTH
-    print(selected_mountains)
-    print(mountains_pointer_x)
 
 def handle_sea_level_bar(position):
     start = BARS_X
@@ -112,7 +118,15 @@ def handle_sea_level_bar(position):
     global selected_sea_level
     selected_sea_level = sea_level_spectrum[0] + percent * range
     sea_level_pointer_x = BARS_X + percent * BAR_LENGTH
-    print(selected_sea_level)
-    print(sea_level_pointer_x)
 
+def handle_urbanization_level_bar(position):
+    start = BARS_X
+    level = position[0]
+    urabnization_level_spectrum = (-1, 1)
+    range = urabnization_level_spectrum[1] - urabnization_level_spectrum[0]
+    percent = (level - start) / BAR_LENGTH
+    global urbanization_level_pointer_x
+    global selected_urbanization_level
+    selected_urbanization_level = urabnization_level_spectrum[0] + percent * range
+    urbanization_level_pointer_x = BARS_X + percent * BAR_LENGTH
 

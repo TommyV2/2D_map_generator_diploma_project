@@ -12,7 +12,7 @@ import random
 
 MAX_CIVS = 4
 
-def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_factor, is_rivers, selected_heights, selected_scale, is_civilizations, civs, is_borders):
+def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_factor, is_rivers, selected_heights, selected_scale, is_civilizations, civs, is_borders, urbanization_level_factor):
     size = (800, 800)
     elevation_seed_index = 1 #randrange(1,2)
     temperature_seed_index = 1 #randrange(1,10)
@@ -23,6 +23,7 @@ def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_
     civilisations = is_civilizations
     water_level = 0.3
     temperature_factor = uniform(-0.6,0.7) #temperature_factor #-0.6 |snieg| -0.1 |trawa| 0.7 piach
+    urbanization_level_factor = urbanization_level_factor
     mountains_factor = mountains_factor
     sea_level_factor = sea_level_factor
     islands_number = randrange(3,10)
@@ -46,7 +47,7 @@ def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_
     elif len(civs) > MAX_CIVS:
         civs = civs[:MAX_CIVS]
     data_object = StartDataObject(size, elevation_seed, temperature_seed, scale, is_rivers, 
-        civilisations, borders, water_level, temperature_factor, islands_number, mountains_factor, sea_level_factor, heights, civs) 
+        civilisations, borders, water_level, temperature_factor, islands_number, mountains_factor, sea_level_factor, urbanization_level_factor, heights, civs) 
     return data_object
 
 pygame.init()
@@ -74,6 +75,8 @@ high_png = pygame.image.load("gui_visuals/high.png")
 low_png = pygame.image.load("gui_visuals/low.png")
 high_water_png = pygame.image.load("gui_visuals/high_water.png")
 low_water_png = pygame.image.load("gui_visuals/low_water.png")
+low_urbanization_png = pygame.image.load("gui_visuals/low_urbanization.png")
+high_urbanization_png = pygame.image.load("gui_visuals/high_urbanization.png")
 height_png = pygame.image.load("gui_visuals/height.png")
 islands_png = pygame.image.load("gui_visuals/islands.png")
 moderate_png = pygame.image.load("gui_visuals/moderate.png")
@@ -113,10 +116,19 @@ sea_level_pointer.fill(pygame.Color('#2b2929'))
 sea_level_text = myfont.render('Sea Level', False, (0, 0, 0))
 #############
 
+# URBANIZATION LEVEL
+urbanization_level_bar = pygame.Surface((gui_helpers.BAR_LENGTH, gui_helpers.BAR_WIDTH))
+urbanization_level_bar.fill(pygame.Color('#cdc8e0'))
+urbanization_level_pointer = pygame.Surface((20, gui_helpers.BAR_WIDTH))
+urbanization_level_pointer.fill(pygame.Color('#2b2929'))
+urbanization_level_text = myfont.render('Urbanization Level', False, (0, 0, 0))
+#############
+
 bars = []
 bars.append((gui_helpers.BARS_X, gui_helpers.TEMPERATURE_BAR_Y))
 bars.append((gui_helpers.BARS_X, gui_helpers.TEMPERATURE_BAR_Y + OFFSET))
 bars.append((gui_helpers.BARS_X, gui_helpers.TEMPERATURE_BAR_Y + 2*OFFSET))
+bars.append((gui_helpers.BARS_X, gui_helpers.TEMPERATURE_BAR_Y + 3*OFFSET))
 scale_buttons = []
 scale_buttons.append((gui_helpers.BARS_X, gui_helpers.SCALE_BUTTON_Y+10))
 scale_buttons.append((gui_helpers.BARS_X+1.5*OFFSET, gui_helpers.SCALE_BUTTON_Y+10))
@@ -193,6 +205,7 @@ is_running = True
 finished = 0
 img = None
 temperature_factor = gui_helpers.selected_temperature
+urbanization_level_factor = gui_helpers.selected_urbanization_level
 show_heights = False
 
 while is_running:
@@ -211,7 +224,7 @@ while is_running:
                     # selected_heights = []
                     # civs = []
                     # gui_helpers.selected_civs_initialized = False
-                    start_data_object = init_data_object(temperature_factor, elevation_seed, mountains_factor, sea_level_factor, is_rivers, selected_heights, selected_scale, is_civilizations,civs, is_borders,  )
+                    start_data_object = init_data_object(temperature_factor, elevation_seed, mountains_factor, sea_level_factor, is_rivers, selected_heights, selected_scale, is_civilizations,civs, is_borders, urbanization_level_factor, )
                     status_text = myfont.render("Loading...", False, (0, 0, 0))
                     thread = Thread(target = main.main, args=(start_data_object,))                  
                     thread.start()
@@ -221,7 +234,7 @@ while is_running:
                     # thread.join()
                 if event.ui_element == redraw_button: 
                     status_text = myfont.render("Loading...", False, (0, 0, 0))            
-                    thread = Thread(target = main.re_draw, args=(temperature_factor,mountains_factor, sea_level_factor, is_rivers, selected_heights,is_civilizations, is_borders, ))                  
+                    thread = Thread(target = main.re_draw, args=(temperature_factor,mountains_factor, sea_level_factor, is_rivers, selected_heights,is_civilizations, is_borders, urbanization_level_factor, ))                  
                     thread.start()
                     show_heights = False                                         
                 if event.ui_element == is_rivers_button_yes:
@@ -252,6 +265,7 @@ while is_running:
             temperature_factor = gui_helpers.selected_temperature
             mountains_factor = gui_helpers.selected_mountains
             sea_level_factor = gui_helpers.selected_sea_level
+            urbanization_level_factor = gui_helpers.selected_urbanization_level
             selected_scale = gui_helpers.selected_scale
             show_heights = True
 
@@ -279,6 +293,12 @@ while is_running:
     window_surface.blit(sea_level_bar, (gui_helpers.BARS_X, gui_helpers.SEA_LEVEL_BAR_Y))
     window_surface.blit(sea_level_pointer, (gui_helpers.sea_level_pointer_x-10, gui_helpers.SEA_LEVEL_BAR_Y))
     window_surface.blit(sea_level_text,(gui_helpers.BARS_X, gui_helpers.SEA_LEVEL_BAR_Y-30))
+
+    window_surface.blit(low_urbanization_png, (gui_helpers.BARS_X-30, gui_helpers.URBANIZATION_LEVEL_BAR_Y))
+    window_surface.blit(high_urbanization_png, (gui_helpers.BARS_X+gui_helpers.BAR_LENGTH+10, gui_helpers.URBANIZATION_LEVEL_BAR_Y)) 
+    window_surface.blit(urbanization_level_bar, (gui_helpers.BARS_X, gui_helpers.URBANIZATION_LEVEL_BAR_Y))
+    window_surface.blit(urbanization_level_pointer, (gui_helpers.urbanization_level_pointer_x-10, gui_helpers.URBANIZATION_LEVEL_BAR_Y))
+    window_surface.blit(urbanization_level_text,(gui_helpers.BARS_X, gui_helpers.URBANIZATION_LEVEL_BAR_Y-30))
 
     window_surface.blit(is_rivers_text,(gui_helpers.BARS_X, gui_helpers.IS_RIVERS_BUTTON_Y-30))
     window_surface.blit(is_rivers_text_2,(gui_helpers.BARS_X + 2*OFFSET+20, gui_helpers.IS_RIVERS_BUTTON_Y+15))

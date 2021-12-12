@@ -8,23 +8,17 @@ def plot_line(x0, y0, x1, y1, wd):
    sx = -1
    if x0 < x1:
        sx = 1
-   # sx = x0 < x1 ? 1 : -1
    dy = abs(y1-y0)
-   # sy = y0 < y1 ? 1 : -1
    sy = -1
    if y0 < y1:
        sy = 1
-   err = dx-dy #, e2, x2, y2
-   # ed = dx+dy == 0 ? 1 : sqrt(float(dx*dx)+float(dy*dy))
+   err = dx-dy
    ed = math.sqrt(float(dx*dx)+float(dy*dy))
    if dx+dy == 0:
        ed = 1
    points = []
    wd = (wd+1)/2
    while(True):
-        #print("1")
-        #wd = (wd+1)/2
-        # setPixelColor(x0,y0,max(0,255*(abs(err-dx+dy)/ed-wd+1)));
         points.append((x0, y0))
         e2 = err
         x2 = x0
@@ -32,12 +26,8 @@ def plot_line(x0, y0, x1, y1, wd):
             e2 += dy
             y2 = y0
             while(True):
-                #print("2")
-                #e2 += dy
-                #y2 = y0
                 if not ((e2 < ed*wd) and (y1 != y2 or dx > dy)):
                     break
-                # setPixelColor(x0, y2 += sy, max(0,255*(abs(e2)/ed-wd+1)));
                 y2 += sy
                 points.append((x0, y2))
                 e2 += dx
@@ -49,13 +39,10 @@ def plot_line(x0, y0, x1, y1, wd):
         if 2*e2 <= dy:
             e2 = dx-e2
             while(True):
-                #print("3")
-                #e2 = dx-e2
                 if not ((e2 < ed*wd) and (x1 != x2 or dx < dy)):
                     break
                 x2 += sx
                 points.append((x2, y0))
-                # setPixelColor(x2 += sx, y0, max(0,255*(abs(e2)/ed-wd+1)));
                 e2 += dy
             if y0 == y1:
                 break

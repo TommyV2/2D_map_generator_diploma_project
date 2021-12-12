@@ -28,6 +28,7 @@ class WorldMap:
         self.temperature_factor = data.temperature_factor
         self.mountains_factor = data.mountains_factor
         self.sea_level_factor = data.sea_level_factor
+        self.urbanization_level_factor = data.urbanization_level_factor
         self.islands_number =  data.islands_number
         self.heights = data.heights
         self.river_starting_points = None
@@ -56,7 +57,7 @@ class WorldMap:
         if self.civilisations:
             #self.countries = self.create_countries(self.heights, 2)
             self.create_countries_map(self.civs)
-            self.generate_cities(self.civs)
+            self.generate_cities(self.civs, self.urbanization_level_factor)
             self.generate_road_list()
             self.generate_roads(self.roads)
         if self.is_rivers:
@@ -79,11 +80,12 @@ class WorldMap:
         
         #self.draw_map()
     def redraw_civilizations(self):
+        self.neutral_cities = []
         # print(self.countries)
         # l = int(len(self.heights)/2)
         # heig = self.heights[:l]
         self.create_countries_map(self.civs)
-        self.generate_cities(self.civs)
+        self.generate_cities(self.civs, self.urbanization_level_factor)
         self.generate_road_list()
         self.generate_roads(self.roads)
         # self.determine_country_indexes(self.civs, self.heights)
@@ -277,12 +279,14 @@ class WorldMap:
         country_index = self.find_country_index_by_height(min, countries)
         return country_index   
 
-    def generate_cities(self, civs):
+    def generate_cities(self, civs, urbanization_factor):
         cities = [None] * len(civs)
         print("++++++++++++++++++++++++++++")
         print(civs)
         print("++++++++++++++++++++++++++++")
         n = randrange(8,20)
+        n = int(9 * urbanization_factor + 11)
+        print(f"Cities: {n}")
         elevation = self.elevation_map
         water_level = self.water_level + self.sea_level_factor
         for i,civ in enumerate(civs):

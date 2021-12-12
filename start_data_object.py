@@ -16,5 +16,7 @@ class StartDataObject:
     islands_number: int
     mountains_factor: float
     sea_level_factor: float
+    urbanization_level_factor: float
     heights: list = None
     civs: list = None
+    
