@@ -17,6 +17,7 @@ def init_data_object(temperature_factor, elevation, mountains_factor, sea_level_
     elevation_seed_index = 1 #randrange(1,2)
     temperature_seed_index = 1 #randrange(1,10)
     elevation_seed =  elevation # np.loadtxt("elevation_seeds/seed"+str(elevation_seed_index)+".txt")
+    elevation_seed = np.loadtxt("elevation_seeds/seed"+str(elevation_seed_index)+".txt")
     temperature_seed = np.loadtxt("temperature_seeds/seed"+str(temperature_seed_index)+".txt")
     scale = selected_scale#get_random_scale()           
     is_rivers = is_rivers

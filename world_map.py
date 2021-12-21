@@ -47,6 +47,10 @@ class WorldMap:
         self.neutral_cities = []
 
     def generate(self):
+        # TEST
+        self.sea_level_factor = -0.063
+        self.heights = [(177, 188), (558, 558), (540, 275), (698, 484)]
+
         self.backup_islands_map = np.copy(self.elevation_map)
         if self.heights == None or self.heights == []:
             self.heights = self.generate_islands(self.size[0], self.size[1], self.islands_number)        
@@ -63,6 +67,10 @@ class WorldMap:
         if self.is_rivers:
             #self.generate_rivers(self.size, self.elevation_map, self.water_level)
             self.generate_river_starting_points(self.elevation_map, self.water_level)
+
+            # TEST
+            self.river_starting_points = [(687, 516), (535, 275), (576, 543), (632, 522), (599, 507), (626, 499), (723, 532), (533, 498), (524, 296), (522, 272), (552, 479), (716, 541)]
+            
             self.generate_rivers(self.size, self.water_level, self.sea_level_factor)       
             self.make_rivers_deep(self.rivers, self.elevation_map, 3)
             #self.make_rivers_deep(self.extra_rivers, self.elevation_map, 2)
